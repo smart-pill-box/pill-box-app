@@ -19,7 +19,7 @@ export default function ClickableButton({ width, height, onPress, text, isEnable
         backgroundColor: "#66E7A9", // Adjust the background color as needed
         justifyContent: "center",
         alignItems: "center",
-        borderRadius: width/16,
+        borderRadius: 13
       },
       buttonText: {
         color: "white", // Adjust the text color as needed

@@ -5,17 +5,18 @@ import { RootStackParamList } from "../../App"
 import ClickablePointer from "../components/ClickablePointer";
 import { globalStyle } from "../style";
 import ClickableButton from "../components/ClickabeButton";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddProfile">
 
-function AvatarNavigator(){
-    const onPointerClick = (orientation: string)=>{
-        console.log("Clicked to ", orientation)
-    }
+type AvatarNavigatorProps = {
+    onAvatarChange: (avatar: number) => void
+}
+
+function AvatarNavigator({ onAvatarChange }: AvatarNavigatorProps){
 
     const styles = StyleSheet.create({
         avatarNavigatorContainer: {
@@ -24,21 +25,55 @@ function AvatarNavigator(){
         },
     })
 
+    type AvatarsLocations = {
+        [key: number]: any;
+    };
+
+    const avatarsLocations: AvatarsLocations = {
+        1: require("../assets/avatars/old-man.png"),
+        2: require("../assets/avatars/old-woman.png")
+    };
+
+    const nextAvatar = ()=>{
+        if(avatarNumber == 2){
+            setAvatarNumber(1)
+            return
+        }
+
+        setAvatarNumber(avatarNumber+1);
+    };
+
+    const previusAvatar = ()=>{
+        if(avatarNumber == 1){
+            setAvatarNumber(2)
+            return
+        }
+
+        setAvatarNumber(avatarNumber-1);
+    }
+
+    const [ avatarNumber, setAvatarNumber ] = useState(1);
+
+    useEffect(()=>{
+        onAvatarChange(avatarNumber);
+    }, [avatarNumber])
+
     return (
         <View style={styles.avatarNavigatorContainer}>
-            <ClickablePointer width={47} height={47} orientation="left" onPress={()=>{onPointerClick("left")}}/>
+            <ClickablePointer width={47} height={47} orientation="left" onPress={previusAvatar}/>
             <Image 
-                source={require("../assets/avatars/old-man.png")}
+                source={avatarsLocations[avatarNumber] || avatarsLocations[1]}
                 width={300}
                 height={300}
             />
-            <ClickablePointer width={47} height={47} orientation="right" onPress={()=>{onPointerClick("right")}}/>
+            <ClickablePointer width={47} height={47} orientation="right" onPress={nextAvatar}/>
         </View>
     )
 }
 
 export default function AddProfileScreen({ route, navigation }: Props){
     const windowDimensions = useWindowDimensions();
+    const buttonWidth = windowDimensions.width - 40;
 
     const styles = StyleSheet.create({
         mainContainer: {
@@ -74,10 +109,9 @@ export default function AddProfileScreen({ route, navigation }: Props){
             width: "100%"
         },
         createButtonContainer: {
-            flexDirection: "row",
-            paddingTop: 80,
-            paddingRight: 16,
-            justifyContent: "flex-end"
+            position: "absolute",
+            bottom: 16,
+            left: windowDimensions.width/2 - buttonWidth/2
         }
 
     })
@@ -91,7 +125,7 @@ export default function AddProfileScreen({ route, navigation }: Props){
         setIsButtonEnabled(false);
         let newProfile = {
             name: newProfileName,
-            avatar: 1,
+            avatar: avatarNumber,
             profileKey: Math.random().toString()
         };
 
@@ -120,6 +154,7 @@ export default function AddProfileScreen({ route, navigation }: Props){
     
     const [newProfileName, setNewProfileName] = useState("");
     const [isButtonEnabled, setIsButtonEnabled] = useState(true);
+    const [avatarNumber, setAvatarNumber] = useState(1);
     
     useFocusEffect(
         useCallback(() => {
@@ -137,7 +172,7 @@ export default function AddProfileScreen({ route, navigation }: Props){
                     <View style={{ paddingBottom: 20 }}>
                         <Text style={[globalStyle.text, styles.bigSoftText]}> Novo Perfil </Text>
                     </View>
-                    <AvatarNavigator/>
+                    <AvatarNavigator onAvatarChange={setAvatarNumber}/>
                     <View style={styles.textInputContainer}>
                         <TextInput
                             placeholderTextColor="#909090"
@@ -149,15 +184,15 @@ export default function AddProfileScreen({ route, navigation }: Props){
                         />
                     </View>
                 </View>
-                <View style={styles.createButtonContainer}>
-                    <ClickableButton 
-                        width={204} 
-                        height={52}
-                        text="Criar Perfil"
-                        onPress={onCreatePressed}
-                        isEnabled={isButtonEnabled}
-                    />
-                </View>
+            </View>
+            <View style={styles.createButtonContainer}>
+                <ClickableButton 
+                    width={buttonWidth} 
+                    height={48}
+                    text="Criar Perfil"
+                    onPress={onCreatePressed}
+                    isEnabled={isButtonEnabled}
+                />
             </View>
         </View>
     )
