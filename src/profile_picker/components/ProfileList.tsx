@@ -24,7 +24,10 @@ export default function ProfileList({ profiles }: ProfileListProps){
             textAlign: "center",
         }
     });
-    const avatarsLocations = {
+    type AvatarsLocation = {
+        [key: number]: any
+    };
+    const avatarsLocations: AvatarsLocation = {
         1: require("../../assets/avatars/old-man.png"),
         2: require("../../assets/avatars/old-woman.png")
     };
@@ -35,7 +38,7 @@ export default function ProfileList({ profiles }: ProfileListProps){
                 return (
                     <View style={styles.profileContainer} key={profile.profileKey}>
                         <Image
-                            source={avatarsLocations[profile.avatar]}
+                            source={avatarsLocations[profile.avatar] || avatarsLocations[1]}
                             width={150}
                             height={150}
                         />
