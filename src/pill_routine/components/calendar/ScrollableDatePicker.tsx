@@ -1,6 +1,7 @@
-import { StyleSheet, FlatList, View } from "react-native";
+import { StyleSheet, FlatList, View, TouchableOpacity, Text } from "react-native";
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import SelectableDate from "./SelectableDate";
+import { globalStyle } from "../../../style";
 
 type DateItem = {
     date: Date;
@@ -39,35 +40,24 @@ type ScrollableDatePickerProps = {
 export default function ScrollableDatePicker({ startDate, onDateSelection }: ScrollableDatePickerProps){
     const styles = useMemo(()=>{
         return StyleSheet.create({
+            mainContainer: {
+                flexDirection: "column",
+                alignItems: "flex-end"
+            },
             scrollContainer: {
                 flexDirection: "row",
                 justifyContent: "space-between"
-            },
-            weekdayText: {
-                color: "#909090",
-                fontSize: 12
-            },
-            monthdayText: {
-                color: "#575757",
-                fontSize: 18,
-                width: "100%",
-                textAlign: "center"
-            },
-            dateContainer: {
-                alignItems: "center"
-            },
-            dateNumberContainer: {
-                width: 40,
-                height: 40,
-                backgroundColor: "#E0F2FF",
-                borderRadius: 8,
-                justifyContent: "center"
             },
             selectableDateContainer: {
                 paddingRight: 8
             }
         })
     }, [])
+
+    const onBackPressed = ()=>{
+        flatlistRef.current?.scrollToIndex({animated: true, index: startDateIndex});
+        setSelectedIndex(startDateIndex);
+    }
 
     const flatlistRef = useRef<FlatList<DateItem>>(null);
 
@@ -94,17 +84,22 @@ export default function ScrollableDatePicker({ startDate, onDateSelection }: Scr
     const keyExtractor = useCallback((item: DateItem) => item.index.toString(), [])
 
     return (
-        <FlatList 
-            contentContainerStyle={styles.scrollContainer}
-            horizontal={true}
-            data={dateList}
-            ref={flatlistRef}
-            extraData={selectedIndex}
-            keyExtractor={keyExtractor}
-            renderItem={renderItem}
-            initialScrollIndex={startDateIndex}
-            getItemLayout={(_, index) => ({ length: 48, offset: 48*index, index})}
-        />
+        <View style={styles.mainContainer}>
+            <FlatList 
+                contentContainerStyle={styles.scrollContainer}
+                horizontal={true}
+                data={dateList}
+                ref={flatlistRef}
+                extraData={selectedIndex}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                initialScrollIndex={startDateIndex}
+                getItemLayout={(_, index) => ({ length: 48, offset: 48*index, index})}
+            />
+            <TouchableOpacity onPress={onBackPressed}>
+                <Text style={[globalStyle.text]}> Voltar para Hoje </Text>
+            </TouchableOpacity>
+        </View>
     )
 }
 
