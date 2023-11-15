@@ -15,7 +15,8 @@ export default function MainHeader({ avatarNumber, profileName }: MainHeaderProp
         headerContainer: {
             width: windowDimensions.width,
             paddingTop: 16,
-            height: 80,
+            paddingBottom: 32,
+            height: 112,
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center"
