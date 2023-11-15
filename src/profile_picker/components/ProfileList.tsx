@@ -1,12 +1,14 @@
-import { View, Text, Image, StyleSheet } from "react-native"
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native"
 import { globalStyle } from "../../style"
 import { Profile } from "../ProfilePickerScreen";
+import Avatar from "../../components/Avatar";
 
 type ProfileListProps = {
-    profiles: Profile[]
+    profiles: Profile[],
+    onProfileClick: (profile: Profile)=>void
 }
 
-export default function ProfileList({ profiles }: ProfileListProps){
+export default function ProfileList({ profiles, onProfileClick }: ProfileListProps){
     const styles = StyleSheet.create({
         container: {
             flexDirection: "row",
@@ -15,34 +17,32 @@ export default function ProfileList({ profiles }: ProfileListProps){
             flexWrap: "wrap"
         },
         profileContainer: {
+            width: "50%",
+            paddingTop: 16,
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
             zIndex: 999
         },
         profileName: {
+            paddingTop: 2,
             textAlign: "center",
         }
     });
-    type AvatarsLocation = {
-        [key: number]: any
-    };
-    const avatarsLocations: AvatarsLocation = {
-        1: require("../../assets/avatars/old-man.png"),
-        2: require("../../assets/avatars/old-woman.png")
-    };
 
     return (
         <View style={styles.container}>
             {profiles.map((profile)=>{
                 return (
                     <View style={styles.profileContainer} key={profile.profileKey}>
-                        <Image
-                            source={avatarsLocations[profile.avatar] || avatarsLocations[1]}
-                            width={150}
-                            height={150}
-                        />
-                        <Text style={[styles.profileName, globalStyle.text]}> {profile.name} </Text>
+                        <TouchableOpacity onPress={()=>onProfileClick(profile)}>
+                            <Avatar
+                                widht={100}
+                                height={100}
+                                avatarNumber={profile.avatar}
+                            />
+                            <Text style={[styles.profileName, globalStyle.text]}> {profile.name} </Text>
+                        </TouchableOpacity>
                     </View>
                 )
             })}

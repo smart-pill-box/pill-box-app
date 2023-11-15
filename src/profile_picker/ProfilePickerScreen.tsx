@@ -8,7 +8,8 @@ import ProfileList from "./components/ProfileList"
 import MaskedView from "@react-native-masked-view/masked-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProfilePicker">
 type MaskedPillsImageProps = {
@@ -20,23 +21,23 @@ type MaskedPillsImageProps = {
 
 export type Profile = {
     name: string,
-    avatar: 1 | 2,
+    avatar: number,
     profileKey: string
 }
 
 
 function MaskedPillsImage({imgHeight, imgWidth, screenWidth, style}: MaskedPillsImageProps){
     return (
-        <SafeAreaView style={{position: "absolute", ...style}}>
+        <SafeAreaView style={{position: "absolute", zIndex: -1, ...style}}>
             <MaskedView
                 maskElement={
                     <Svg height={imgHeight} width={imgWidth}>
-                        <Ellipse cx={screenWidth/2 - 20} cy={imgHeight/2 + 20} rx={7*screenWidth/8} ry={imgHeight/2}/>
+                        <Ellipse cx={screenWidth/2 + 20} cy={imgHeight/2 + 20} rx={7*screenWidth/8} ry={imgHeight/2}/>
                     </Svg>
                 }
             >
                 <Image
-                    source={require("./assets/pills_shuffled.png")}
+                    source={require("./assets/pills_doodle.png")}
                     width={imgWidth}
                     height={imgHeight}
                 />
@@ -55,8 +56,9 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
             height: windowDimensions.height
         },
         maskedImage: {
+            position: "absolute",
             left: 0,
-            bottom: -30
+            bottom: -100
         },
         headerContainer: {
             width: windowDimensions.width,
@@ -69,22 +71,27 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
             padding: 16
         }
     });
+
+    const onProfileChoice = (profile: Profile)=>{
+        navigation.navigate("PillRoutine", profile)
+    }
     
     const [profiles, setProfiles] = useState([]);
     const onAddBttnPress = (event: GestureResponderEvent) =>{
         navigation.navigate("AddProfile");
     };
 
-    useEffect(()=>{
-        AsyncStorage.getItem("profiles").then((profiles)=>{
-            console.log(profiles);
-            if (!profiles){
-                return
-            }
-            setProfiles(JSON.parse(profiles));
-        })
-    }, [])
-
+    useFocusEffect(
+        useCallback(()=>{
+            AsyncStorage.getItem("profiles").then((profiles)=>{
+                console.log(profiles);
+                if (!profiles){
+                    return
+                }
+                setProfiles(JSON.parse(profiles));
+            })
+        }, [])
+    );
 
     return (
         <View style={style.mainContainer}>
@@ -95,11 +102,11 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
                 </View>
             </View>
             <View>
-                <ProfileList profiles={profiles}/>
+                <ProfileList profiles={profiles} onProfileClick={onProfileChoice}/>
             </View>
             <MaskedPillsImage 
-                imgWidth={591}
-                imgHeight={394}
+                imgWidth={400}
+                imgHeight={400}
                 screenWidth={windowDimensions.width}
                 style={style.maskedImage}
             />

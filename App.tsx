@@ -14,45 +14,31 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import ProfilePickerScreen from './src/profile_picker/ProfilePickerScreen';
+import ProfilePickerScreen, { Profile } from './src/profile_picker/ProfilePickerScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AddProfileScreen from './src/profile_picker/AddProfileScreen';
+import PillRoutineScreen from './src/pill_routine/PillRoutineScreen';
 
 export type RootStackParamList = {
   ProfilePicker: undefined;
   AddProfile: undefined;
+  PillRoutine: Profile;
 }
 
 function App(): JSX.Element {
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
-  useEffect(()=>{
-    const exampleProfiles = [
-      {
-        name: "André",
-        avatar: 1,
-        profileKey: "aksjdkasjd"
-      },
-      {
-        name: "Jessica",
-        avatar: 2,
-        profileKey: "vakjsdasd"
-      }
-    ]
-    AsyncStorage.setItem("profiles", JSON.stringify(exampleProfiles)).then(()=>{
-      return
-    })
-  }, [])
 
   return (
     <NavigationContainer>
       <Stack.Navigator
-      initialRouteName="AddProfile"
+      initialRouteName="ProfilePicker"
       screenOptions={{
         headerShown: false,
       }}>
         <Stack.Screen name="ProfilePicker" component={ProfilePickerScreen}/>
         <Stack.Screen name="AddProfile" component={AddProfileScreen}/>
+        <Stack.Screen name="PillRoutine" component={PillRoutineScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

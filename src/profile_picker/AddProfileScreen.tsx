@@ -23,15 +23,22 @@ function AvatarNavigator({ onAvatarChange }: AvatarNavigatorProps){
             flexDirection: "row",
             alignItems: "center"
         },
-    })
+        image: {
+            width: 150,
+            height: 150
+        },
+        imageContainer: {
+            padding: 16
+        }
+    });
 
     type AvatarsLocations = {
         [key: number]: any;
     };
 
     const avatarsLocations: AvatarsLocations = {
-        1: require("../assets/avatars/old-man.png"),
-        2: require("../assets/avatars/old-woman.png")
+        1: require("../assets/avatars/man.png"),
+        2: require("../assets/avatars/woman.png")
     };
 
     const nextAvatar = ()=>{
@@ -61,11 +68,13 @@ function AvatarNavigator({ onAvatarChange }: AvatarNavigatorProps){
     return (
         <View style={styles.avatarNavigatorContainer}>
             <ClickablePointer width={47} height={47} orientation="left" onPress={previusAvatar}/>
-            <Image 
-                source={avatarsLocations[avatarNumber] || avatarsLocations[1]}
-                width={300}
-                height={300}
-            />
+            <View style={styles.imageContainer}>
+                <Image 
+                    source={avatarsLocations[avatarNumber] || avatarsLocations[1]}
+                    style={styles.image}
+                    resizeMode="contain"
+                />
+            </View>
             <ClickablePointer width={47} height={47} orientation="right" onPress={nextAvatar}/>
         </View>
     )
