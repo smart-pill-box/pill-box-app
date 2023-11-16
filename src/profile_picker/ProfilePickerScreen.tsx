@@ -73,7 +73,7 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
     });
 
     const onProfileChoice = (profile: Profile)=>{
-        navigation.navigate("PillRoutine", profile)
+        navigation.navigate("Home", profile)
     }
     
     const [profiles, setProfiles] = useState([]);

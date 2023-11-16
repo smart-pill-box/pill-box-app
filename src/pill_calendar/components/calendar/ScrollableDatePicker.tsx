@@ -12,13 +12,13 @@ function generateDateList(startDate: Date, dateRange: number): {dateList: DateIt
     const dateList: DateItem[] = [];
 
     const endDate = new Date(startDate.getTime());
-    endDate.setDate(endDate.getUTCDate() + dateRange);
+    endDate.setDate(endDate.getDate() + dateRange);
 
     const firstDate = new Date(startDate.getTime());
-    firstDate.setDate(firstDate.getUTCDate() - dateRange);
+    firstDate.setDate(firstDate.getDate() - dateRange);
 
     let index = 0;
-    for (let dateIterator = new Date(firstDate.getTime()); dateIterator <= endDate; dateIterator.setDate(dateIterator.getUTCDate() + 1)) {
+    for (let dateIterator = new Date(firstDate.getTime()); dateIterator <= endDate; dateIterator.setDate(dateIterator.getDate() + 1)) {
         dateList.push({
             date: new Date(dateIterator.getTime()),
             index: index
@@ -50,6 +50,18 @@ export default function ScrollableDatePicker({ startDate, onDateSelection }: Scr
             },
             selectableDateContainer: {
                 paddingRight: 8
+            },
+            backText: {
+                color: "#909090",
+                fontSize: 12,
+                width: 64,
+                textAlign: "center"
+            },
+            backTextContainer: {
+                height: 44,
+                width: 80,
+                alignItems: "center",
+                justifyContent: "center"
             }
         })
     }, [])
@@ -97,7 +109,9 @@ export default function ScrollableDatePicker({ startDate, onDateSelection }: Scr
                 getItemLayout={(_, index) => ({ length: 48, offset: 48*index, index})}
             />
             <TouchableOpacity onPress={onBackPressed}>
-                <Text style={[globalStyle.text]}> Voltar para Hoje </Text>
+                <View style={styles.backTextContainer}>
+                    <Text style={[globalStyle.text, styles.backText]}> Voltar para hoje </Text>
+                </View>
             </TouchableOpacity>
         </View>
     )

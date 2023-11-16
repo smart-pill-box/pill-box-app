@@ -6,7 +6,7 @@
  */
 
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect } from 'react';
 import {
   SafeAreaView,
@@ -17,17 +17,45 @@ import {
 import ProfilePickerScreen, { Profile } from './src/profile_picker/ProfilePickerScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AddProfileScreen from './src/profile_picker/AddProfileScreen';
-import PillRoutineScreen from './src/pill_routine/PillRoutineScreen';
+import PillRoutineScreen from './src/pill_calendar/PillCalendarScreen';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import PillCalendarScreen from './src/pill_calendar/PillCalendarScreen';
+import PillBoxManagerScreen from './src/pill_box_manager/PillBoxManagerScreen';
+import PillRoutineManagerScreen from './src/pill_routine_manager/PillRoutineManagerScreen';
 
 export type RootStackParamList = {
   ProfilePicker: undefined;
   AddProfile: undefined;
   PillRoutine: Profile;
+  Home: Profile;
 }
+
+export type RootTabParamList = {
+  PillCalendar: Profile;
+  PillBoxManager: Profile;
+  PillRoutineManager: Profile;
+}
+
+type HomeProps = NativeStackScreenProps<RootStackParamList, "Home">
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<RootTabParamList>();
+
+function Home({ route, navigation }: HomeProps): JSX.Element {
+  return (
+    <Tab.Navigator initialRouteName="PillCalendar" screenOptions={{
+      headerShown: false
+    }}>
+      <Tab.Screen name="PillCalendar" component={PillCalendarScreen} initialParams={route.params}/>
+      <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen}/>
+      <Tab.Screen name="PillRoutineManager" component={PillRoutineManagerScreen}/>
+    </Tab.Navigator>
+  )
+}
+
 
 function App(): JSX.Element {
 
-  const Stack = createNativeStackNavigator<RootStackParamList>();
 
   return (
     <NavigationContainer>
@@ -38,7 +66,7 @@ function App(): JSX.Element {
       }}>
         <Stack.Screen name="ProfilePicker" component={ProfilePickerScreen}/>
         <Stack.Screen name="AddProfile" component={AddProfileScreen}/>
-        <Stack.Screen name="PillRoutine" component={PillRoutineScreen}/>
+        <Stack.Screen name="Home" component={Home}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
