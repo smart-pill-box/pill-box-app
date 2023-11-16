@@ -21,7 +21,7 @@ import PillRoutineScreen from './src/pill_calendar/PillCalendarScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import PillCalendarScreen from './src/pill_calendar/PillCalendarScreen';
 import PillBoxManagerScreen from './src/pill_box_manager/PillBoxManagerScreen';
-import PillRoutineManagerScreen from './src/pill_routine_manager/PillRoutineManagerScreen';
+import PillRoutineManagerNavigator from './src/pill_routine_manager/PillRoutineManagerNavigator';
 
 export type RootStackParamList = {
   ProfilePicker: undefined;
@@ -33,7 +33,7 @@ export type RootStackParamList = {
 export type RootTabParamList = {
   PillCalendar: Profile;
   PillBoxManager: Profile;
-  PillRoutineManager: Profile;
+  PillRoutineManagerNavigator: Profile;
 }
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Home">
@@ -47,8 +47,8 @@ function Home({ route, navigation }: HomeProps): JSX.Element {
       headerShown: false
     }}>
       <Tab.Screen name="PillCalendar" component={PillCalendarScreen} initialParams={route.params}/>
+      <Tab.Screen name="PillRoutineManagerNavigator" component={PillRoutineManagerNavigator} initialParams={route.params}/>
       <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen}/>
-      <Tab.Screen name="PillRoutineManager" component={PillRoutineManagerScreen}/>
     </Tab.Navigator>
   )
 }
