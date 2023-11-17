@@ -1,7 +1,10 @@
 import { createContext } from "react";
 
-type PillRoutineForm = {
-    name?: string
+export type PillRoutineType = "weekdays" | "everyday" | "someDays";
+
+export type PillRoutineForm = {
+    name?: string,
+    pillRoutineType?: "weekdays" | "everyday" | "someDays"
 }
 
 export type PillRoutineFormContextType = {

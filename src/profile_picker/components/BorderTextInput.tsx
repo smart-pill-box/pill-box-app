@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput } from "react-native";
+import { StyleSheet, View, TextInput, KeyboardTypeOptions } from "react-native";
 import { globalStyle } from "../../style";
 
 type Props = {
@@ -7,9 +7,12 @@ type Props = {
     currentValue: string | undefined;
     width: number;
     height: number;
+    keyboardType?: KeyboardTypeOptions;
+    maxLength?: number;
+    style?: object;
 }
 
-export default function BorderTextInput({placeholder, onChangeText, currentValue, width, height}: Props){
+export default function BorderTextInput({placeholder, onChangeText, currentValue, width, height, keyboardType, maxLength, style}: Props){
     const styles = StyleSheet.create({
         textInputContainer: {
             borderRadius: 6,
@@ -17,11 +20,13 @@ export default function BorderTextInput({placeholder, onChangeText, currentValue
             borderColor: "#A3A3A3",
             width: width,
             height: height,
-            alignItems: "center"
+            alignItems: "center",
         },
         textInput: {
             textAlign: "center",
-            width: "100%"
+            textAlignVertical: "center",
+            width: "100%",
+            height: "100%"
         },
     })
 
@@ -31,9 +36,10 @@ export default function BorderTextInput({placeholder, onChangeText, currentValue
                 placeholderTextColor="#909090"
                 placeholder={placeholder}
                 onChangeText={onChangeText}
-                maxLength={50}
+                maxLength={maxLength ? maxLength : 50}
                 value={currentValue}
-                style={[globalStyle.text, styles.textInput]}
+                style={[globalStyle.text, styles.textInput, style]}
+                keyboardType={keyboardType}
             />
         </View>
     )
