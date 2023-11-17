@@ -28,7 +28,8 @@ export default function SelectableButton({isSelected, onPress, text, width, heig
         text: {
             color: isSelected ? "white" : "black",
             fontSize: 20,
-            textAlign: "center"
+            textAlign: "center",
+            textAlignVertical: "center"
         }
     });
 

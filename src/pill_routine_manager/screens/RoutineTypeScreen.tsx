@@ -8,6 +8,10 @@ import SelectableButton from "../components/SelectableButton";
 import { globalStyle } from "../../style";
 import ClickableButton from "../../components/ClickabeButton";
 
+export type RoutineTypeAnswers = {
+    routineType: "weekdays" | "dayPeriod"
+}
+
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "RoutineType">;
 
 export default function RoutineTypeScreen({route, navigation}: Props){
@@ -36,7 +40,7 @@ export default function RoutineTypeScreen({route, navigation}: Props){
             paddingHorizontal: 16,
             bottom: 16
         }
-    })
+    });
 
     const validateAndContinue = ()=>{
         if (!selectedType){
@@ -44,19 +48,42 @@ export default function RoutineTypeScreen({route, navigation}: Props){
         }
 
         setPillRoutineForm((pillRoutineForm: PillRoutineForm)=>{
-            pillRoutineForm.pillRoutineType = selectedType;
+            if (selectedType == "everyday"){
+                pillRoutineForm.weekdaysPickerAnswers = {
+                    weekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+                };
+                pillRoutineForm.routineTypeAnswers = {
+                    routineType: "weekdays"
+                };
+
+                return pillRoutineForm;
+            }
+            pillRoutineForm.routineTypeAnswers = {
+                routineType: selectedType
+            };
             return pillRoutineForm;
         });
 
-        navigation.navigate("TimesPerDay", route.params)
+        if (selectedType == "weekdays"){
+            navigation.navigate("WeekdaysPicker", route.params);
+        }
+        else {
+            navigation.navigate("TimesPerDay", route.params)
+        }
+
     }
 
+    
     const { pillRoutineForm, setPillRoutineForm } = useContext(PillRoutineFormContext);
+    if (!pillRoutineForm || !pillRoutineForm.nameDefinitionAnswers){
+        throw(Error);
+    }
+    const nameDefinitionAnswers = pillRoutineForm.nameDefinitionAnswers;
     const [ selectedType, setSelectedType ] = useState<PillRoutineType | undefined>();
 
     return (
         <View style={{height: "100%"}}>
-            <FormsHeader onBackPressed={()=>{navigation.goBack()}} pillName={pillRoutineForm?.name}/>
+            <FormsHeader onBackPressed={()=>{navigation.goBack()}} pillName={nameDefinitionAnswers.name}/>
             <View style={styles.mainContainer}>
                 <Text style={[globalStyle.text, styles.text]}> Com qual frequência você toma esse remédio?</Text>
                 <View style={styles.optionsContainer}>
@@ -78,8 +105,8 @@ export default function RoutineTypeScreen({route, navigation}: Props){
                         width={240}
                         heigh={40}
                         text="A cada X dias"
-                        onPress={()=>{setSelectedType("someDays")}}
-                        isSelected={selectedType == "someDays"}
+                        onPress={()=>{setSelectedType("dayPeriod")}}
+                        isSelected={selectedType == "dayPeriod"}
                     />
                 </View>
 

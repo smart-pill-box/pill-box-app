@@ -26,7 +26,7 @@ type Props = BottomTabScreenProps<RootTabParamList, "PillRoutineManagerNavigator
 const Stack = createNativeStackNavigator<PillRoutineStackParamList>()
 
 export default function PillRoutineManagerNavigator({ route, navigation }: Props){
-    const [ pillRoutineForm, setPillRoutineForm ] = useState<null | object>(null);
+    const [ pillRoutineForm, setPillRoutineForm ] = useState<object>({});
 
     return (
         <PillRoutineFormContext.Provider value={{

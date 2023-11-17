@@ -6,7 +6,11 @@ import { globalStyle } from "../../style";
 import FormsHeader from "../components/FormsHeader";
 import BorderTextInput from "../../profile_picker/components/BorderTextInput";
 import { useContext, useState } from "react";
-import { PillRoutineFormContext } from "../PillRoutineFormContext";
+import { PillRoutineForm, PillRoutineFormContext, PillRoutineFormContextType } from "../PillRoutineFormContext";
+
+export type NameDefinitionAnswers = {
+    name: string
+}
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "NameDefinition">;
 
@@ -34,8 +38,12 @@ export default function NameDefinitionScreen({ route, navigation }: Props){
             return
         }
 
-        setPillRoutineForm({
-            name: pillName
+        setPillRoutineForm((pillRoutineForm: PillRoutineForm)=>{
+            pillRoutineForm.nameDefinitionAnswers = {
+                name: pillName
+            };
+
+            return pillRoutineForm;
         });
 
         navigation.navigate("RoutineType", route.params)

@@ -3,11 +3,27 @@ import { StyleSheet, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PillRoutineStackParamList } from "../PillRoutineManagerNavigator";
 import { useContext, useState } from "react";
-import { PillRoutineFormContext } from "../PillRoutineFormContext";
+import { PillRoutineForm, PillRoutineFormContext } from "../PillRoutineFormContext";
 import FormsHeader from "../components/FormsHeader";
 import { globalStyle } from "../../style";
 import ClickableButton from "../../components/ClickabeButton";
 import BorderTextInput from "../../profile_picker/components/BorderTextInput";
+
+export type TimesPerDayWeekdaysAnswers = {
+    monday?: number;
+    tuesday?: number;
+    wednesday?: number;
+    thursday?: number;
+    friday?: number;
+    saturday?: number;
+    sunday?: number;
+};
+
+export type TimesPerDayDayPeriodAnswers = {
+    timesPerDay: number;
+};
+
+export type TimesPerDayAnswers = TimesPerDayDayPeriodAnswers | TimesPerDayWeekdaysAnswers;  
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "TimesPerDay">;
 
@@ -54,15 +70,47 @@ export default function TimesPerDayScreen({ route, navigation }: Props){
             return
         }
 
-        console.log("ok")
+        if(pillRoutineForm.routineTypeAnswers?.routineType == "weekdays"){
+            const weekdays = pillRoutineForm.weekdaysPickerAnswers?.weekdays
+            if (!weekdays){
+                throw new Error();
+            }
+
+            let weekdayAnswers: TimesPerDayWeekdaysAnswers = {};
+            
+            weekdays.forEach(weekday => {
+                weekdayAnswers[weekday] = +timesPerDay;
+            });
+            setPillRoutineForm((pillRoutineForm: PillRoutineForm)=>{
+                pillRoutineForm.timesPerDayAnswers = weekdayAnswers;
+                return pillRoutineForm;
+            })
+        }
+        else if(pillRoutineForm.routineTypeAnswers?.routineType == "dayPeriod"){
+            setPillRoutineForm((pillRoutineForm: PillRoutineForm)=>{
+                pillRoutineForm.timesPerDayAnswers = {
+                    timesPerDay: +timesPerDay
+                };
+                return pillRoutineForm;
+            });
+        }
+        else {
+            throw new Error();
+        }
+
+        navigation.navigate("DoseTimePicker", route.params);
     }
 
     const { pillRoutineForm, setPillRoutineForm } = useContext(PillRoutineFormContext);
+    if (!pillRoutineForm || !pillRoutineForm.nameDefinitionAnswers){
+        throw new Error();
+    }
+
     const [ timesPerDay, setTimesPerDay ] = useState<string | undefined>();
 
     return (
         <View style={{height: "100%"}}>
-            <FormsHeader onBackPressed={()=>{navigation.goBack()}} pillName={pillRoutineForm?.name}/>
+            <FormsHeader onBackPressed={()=>{navigation.goBack()}} pillName={pillRoutineForm.nameDefinitionAnswers.name}/>
             <View style={styles.mainContainer}>
                 <Text style={[globalStyle.text, styles.questionText]}>Quantas vezes por dia você tomará esse remédio? </Text>
                 <View style={styles.inputContainer}>
