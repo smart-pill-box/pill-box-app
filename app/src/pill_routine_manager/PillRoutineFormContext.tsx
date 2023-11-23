@@ -7,35 +7,6 @@ import { DoseTimePickerAnswers } from "./screens/DoseTimePickerScreen";
 
 export type PillRoutineType = "weekdays" | "everyday" | "dayPeriod";
 
-export type WeekdaysPillRoutineData = {
-    monday?: string[];
-    tuesday?: string[];
-    wednesday?: string[];
-    thursday?: string[];
-    friday?: string[];
-    saturday?: string[];
-    sunday?: string[];
-}
-
-export type WeekdaysPillRoutinePayload = {
-    pillRoutineType: "weekdays";
-    name: string;
-    pillRoutineData: WeekdaysPillRoutineData;
-};
-
-export type DayPeriodPillRoutineData = {
-    pillsTimes: string[];
-    periodInDays: number;
-}
-
-export type DayPeriodRoutinePayload = {
-    pillRoutineType: "dayPeriod";
-    name: string;
-    pillRoutineData: DayPeriodPillRoutineData
-};
-
-export type PillRoutinePayload = WeekdaysPillRoutinePayload | DayPeriodRoutinePayload;
-
 export interface PillRoutineForm {
     nameDefinitionAnswers?: NameDefinitionAnswers;
     routineTypeAnswers?: RoutineTypeAnswers;

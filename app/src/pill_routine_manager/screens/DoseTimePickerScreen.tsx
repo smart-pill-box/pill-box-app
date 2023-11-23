@@ -5,9 +5,11 @@ import ClickableButton from "../../components/ClickabeButton";
 import { globalStyle } from "../../style";
 import FormsHeader from "../components/FormsHeader";
 import { useContext, useState } from "react";
-import { DayPeriodPillRoutineData, PillRoutineForm, PillRoutineFormContext, PillRoutinePayload, WeekdaysPillRoutineData } from "../PillRoutineFormContext";
+import { PillRoutineForm, PillRoutineFormContext } from "../PillRoutineFormContext";
 import { DateTimePickerAndroid, DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { TimesPerDayWeekdaysAnswers, TimesPerDayDayPeriodAnswers, TimesPerDayAnswers } from "./TimesPerDayScreen";
+import { DayPeriodPillRoutineData, WeekdaysPillRoutineData } from "../../types/pill_routine";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type WeekdaysAnswers = {
     monday?: string[];
@@ -127,7 +129,10 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
 
         const payload = createPillRoutinePayload(pillRoutineForm, pickedTimesPerDose);
 
-        console.log(payload);
+        AsyncStorage.setItem("pillRoutines", JSON.stringify([payload])).then(()=>{
+            navigation.navigate("PillRoutineManager", route.params)
+        })
+
     }
 
     const { pillRoutineForm, setPillRoutineForm } = useContext(PillRoutineFormContext);

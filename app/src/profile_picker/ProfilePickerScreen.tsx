@@ -1,4 +1,4 @@
-import { Text, View, Image, StyleSheet, useWindowDimensions, GestureResponderEvent } from "react-native"
+import { Text, View, Image, StyleSheet, useWindowDimensions, GestureResponderEvent, TouchableOpacity } from "react-native"
 import { RootStackParamList } from "../../App"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import Svg, { Ellipse, ClipPath } from 'react-native-svg';
@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import { useKeycloak } from "@react-keycloak/native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProfilePicker">
 type MaskedPillsImageProps = {
@@ -72,6 +73,7 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
         }
     });
 
+
     const onProfileChoice = (profile: Profile)=>{
         navigation.navigate("Home", profile)
     }
@@ -80,6 +82,8 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
     const onAddBttnPress = (event: GestureResponderEvent) =>{
         navigation.navigate("AddProfile");
     };
+
+    const { keycloak } = useKeycloak();
 
     useFocusEffect(
         useCallback(()=>{
@@ -90,6 +94,9 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
                 }
                 setProfiles(JSON.parse(profiles));
             })
+            fetch("/api/account")
+                .then((res)=>res.json())
+                .then((json)=>console.log("finished fetch", json))
         }, [])
     );
 
@@ -110,6 +117,14 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
                 screenWidth={windowDimensions.width}
                 style={style.maskedImage}
             />
+            <TouchableOpacity
+                onPress={()=>{keycloak?.logout().catch(err=>console.log(err))}}
+            >
+                <View style={{ width: 200, height: 100, alignSelf: "center", borderColor: "black", borderWidth: 1 }}>
+                    <Text style={{color: "black", fontSize: 30}}> {keycloak?.authenticated ? "YES" : "NO"} </Text>
+                </View>
+            </TouchableOpacity>
+
         </View>
     )
 }
