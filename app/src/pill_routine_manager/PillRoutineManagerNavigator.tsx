@@ -7,18 +7,19 @@ import NameDefinitionScreen from "./screens/NameDefinitionScreen";
 import RoutineTypeScreen from "./screens/RoutineTypeScreen";
 import TimesPerDayScreen from "./screens/TimesPerDayScreen";
 import WeekdaysPickerScreen from "./screens/WeekdaysPickerScreen";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { PillRoutineFormContext } from "./PillRoutineFormContext";
 import { Profile } from "../profile_picker/ProfilePickerScreen";
 import { RootTabParamList } from "../../App";
+import { ProfileKeyContext } from "../profile_picker/ProfileKeyContext";
 
 export type PillRoutineStackParamList = {
-    PillRoutineManager: Profile;
-    DoseTimePicker: Profile;
-    NameDefinition: Profile;
-    RoutineType: Profile;
-    TimesPerDay: Profile;
-    WeekdaysPicker: Profile;
+    PillRoutineManager: undefined;
+    DoseTimePicker: undefined;
+    NameDefinition: undefined;
+    RoutineType: undefined;
+    TimesPerDay: undefined;
+    WeekdaysPicker: undefined;
 }
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillRoutineManagerNavigator">
@@ -27,6 +28,7 @@ const Stack = createNativeStackNavigator<PillRoutineStackParamList>()
 
 export default function PillRoutineManagerNavigator({ route, navigation }: Props){
     const [ pillRoutineForm, setPillRoutineForm ] = useState<object>({});
+    const {profileKey, setProfileKey} = useContext(ProfileKeyContext);
 
     return (
         <PillRoutineFormContext.Provider value={{
@@ -39,12 +41,12 @@ export default function PillRoutineManagerNavigator({ route, navigation }: Props
                     headerShown: false
                 }}
             >
-                <Stack.Screen name="PillRoutineManager" component={PillRoutineManagerScreen} initialParams={route.params}/>
-                <Stack.Screen name="DoseTimePicker" component={DoseTimePickerScreen} initialParams={route.params}/>
-                <Stack.Screen name="NameDefinition" component={NameDefinitionScreen} initialParams={route.params}/>
-                <Stack.Screen name="RoutineType" component={RoutineTypeScreen} initialParams={route.params}/>
-                <Stack.Screen name="TimesPerDay" component={TimesPerDayScreen} initialParams={route.params}/>
-                <Stack.Screen name="WeekdaysPicker" component={WeekdaysPickerScreen} initialParams={route.params}/>
+                <Stack.Screen name="PillRoutineManager" component={PillRoutineManagerScreen}/>
+                <Stack.Screen name="DoseTimePicker" component={DoseTimePickerScreen}/>
+                <Stack.Screen name="NameDefinition" component={NameDefinitionScreen}/>
+                <Stack.Screen name="RoutineType" component={RoutineTypeScreen}/>
+                <Stack.Screen name="TimesPerDay" component={TimesPerDayScreen}/>
+                <Stack.Screen name="WeekdaysPicker" component={WeekdaysPickerScreen}/>
             </Stack.Navigator>
         </PillRoutineFormContext.Provider>
     )

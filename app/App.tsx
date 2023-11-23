@@ -7,7 +7,7 @@
 
 import { NavigationContainer } from '@react-navigation/native';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import keycloakClient from './keycloak';
 import ProfilePickerScreen, { Profile } from './src/profile_picker/ProfilePickerScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,19 +19,19 @@ import PillBoxManagerScreen from './src/pill_box_manager/PillBoxManagerScreen';
 import PillRoutineManagerNavigator from './src/pill_routine_manager/PillRoutineManagerNavigator';
 import { ReactNativeKeycloakProvider, useKeycloak } from '@react-keycloak/native';
 import LoginScreen from './src/login/screens/LoginScreen';
+import { ProfileKeyContext } from './src/profile_picker/ProfileKeyContext';
 
 export type RootStackParamList = {
   ProfilePicker: undefined;
   AddProfile: undefined;
   Login: undefined;
-  PillRoutine: Profile;
-  Home: Profile;
+  Home: {profileKey: string};
 }
 
 export type RootTabParamList = {
-  PillCalendar: Profile;
-  PillBoxManager: Profile;
-  PillRoutineManagerNavigator: Profile;
+  PillCalendar: undefined;
+  PillBoxManager: undefined;
+  PillRoutineManagerNavigator: undefined;
 }
 
 const linking = {
@@ -50,14 +50,22 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 function Home({ route, navigation }: HomeProps): JSX.Element {
+  const [profile, setProfile] = useState<string>(route.params.profileKey);
+
   return (
-    <Tab.Navigator initialRouteName="PillCalendar" screenOptions={{
-      headerShown: false
-    }}>
-      <Tab.Screen name="PillCalendar" component={PillCalendarScreen} initialParams={route.params}/>
-      <Tab.Screen name="PillRoutineManagerNavigator" component={PillRoutineManagerNavigator} initialParams={route.params}/>
-      <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen}/>
-    </Tab.Navigator>
+    <ProfileKeyContext.Provider value={{
+      profileKey: route.params.profileKey,
+      setProfileKey: setProfile
+    }}
+    >
+      <Tab.Navigator initialRouteName="PillCalendar" screenOptions={{
+        headerShown: false
+      }}>
+        <Tab.Screen name="PillCalendar" component={PillCalendarScreen}/>
+        <Tab.Screen name="PillRoutineManagerNavigator" component={PillRoutineManagerNavigator}/>
+        <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen}/>
+      </Tab.Navigator>
+    </ProfileKeyContext.Provider>
   )
 }
 

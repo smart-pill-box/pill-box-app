@@ -27,7 +27,7 @@ type DayPeriodAnswers = {
 
 export type DoseTimePickerAnswers = WeekdaysAnswers | DayPeriodAnswers
 
-type Props = NativeStackScreenProps<PillRoutineStackParamList, "RoutineType">;
+type Props = NativeStackScreenProps<PillRoutineStackParamList, "DoseTimePicker">;
 type DoseProps = {
     doseNumber: number;
     selectedTime?: string

@@ -3,8 +3,12 @@ import { RootTabParamList, RootStackParamList } from "../../App";
 import { View, Image, StyleSheet, Text } from "react-native";
 import MainHeader from "../components/MainHeader";
 import ScrollableDatePicker from "./components/calendar/ScrollableDatePicker";
-import { useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { globalStyle } from '../style';
+import { ProfileKeyContext } from '../profile_picker/ProfileKeyContext';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
+import { useKeycloak } from '@react-keycloak/native';
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillCalendar">
 
@@ -54,17 +58,43 @@ function NoPillContainer(){
 
 export default function PillCalendarScreen({ route, navigation }: Props){
     const initialDate = new Date();
+    const {keycloak} = useKeycloak()
     const [ selectedDate, setSelectedDate ] = useState<Date>(initialDate)
+    const { profileKey, setProfileKey } = useContext(ProfileKeyContext)
+    const [ profileData, setProfileData ] = useState({
+        name: "",
+        avatarNumber: 1
+    })
 
     const today = new Date();
 
+    useFocusEffect(
+        useCallback(()=>{
+            const getProfile = async () => {
+                try {
+                    const { data } = await axios.get(`api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`)
+                    console.log(data);
+                    
+                    setProfileData({
+                        name: data.name,
+                        avatarNumber: data.avatarNumber
+                    })
+                }
+                catch(err){
+                    console.error(err);
+                }
+            }
+
+            getProfile()
+        }, [])
+    )
     const onDateSelection = (date: Date)=>{
         setSelectedDate(date);
     }
     
     return (
         <View style={{height: "100%"}}>
-            <MainHeader profileName={route.params.name} avatarNumber={route.params.avatar}/>
+            <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
             <ScrollableDatePicker startDate={initialDate} onDateSelection={onDateSelection}/>
             <NoPillContainer/>
         </View>

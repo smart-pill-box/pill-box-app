@@ -11,6 +11,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useKeycloak } from "@react-keycloak/native";
+import axios from "axios";
+import BorderTextInput from "./components/BorderTextInput";
+import AvatarNavigator from "./components/AvatarNavigator";
+import { globalStyle } from "../style";
+import SelectableButton from "../pill_routine_manager/components/SelectableButton";
+import ClickableButton from "../components/ClickabeButton";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProfilePicker">
 type MaskedPillsImageProps = {
@@ -22,7 +28,7 @@ type MaskedPillsImageProps = {
 
 export type Profile = {
     name: string,
-    avatar: number,
+    avatarNumber: number,
     profileKey: string
 }
 
@@ -44,6 +50,85 @@ function MaskedPillsImage({imgHeight, imgWidth, screenWidth, style}: MaskedPills
                 />
             </MaskedView>
         </SafeAreaView>
+    )
+};
+
+function FirstAccessComponent({ onAccountCreated }: {onAccountCreated: ()=>void}){
+    const windowDimensions = useWindowDimensions();
+    const { keycloak } = useKeycloak();
+
+    const styles = StyleSheet.create({
+        mainContainer: {
+            width: windowDimensions.width,
+            height: windowDimensions.height,
+            position: "relative"
+        },
+        contentContainer: {
+            width: windowDimensions.width,
+            height: 400,
+            gap: 20,
+            justifyContent: "flex-end",
+            alignItems: "center"
+        },
+        text: {
+            textAlign: "center",
+            color: "#575757",
+            fontSize: 32
+        },
+        textContainer: {
+            width: "90%"
+        },
+        buttonContainer: {
+            position: "absolute",
+            alignSelf: "center",
+            bottom: 16
+        }
+    });
+
+    const [avatarNumber, setAvatarNumber] = useState(0)
+    const [profileName, setProfileName] = useState("")
+    const onButtonPressed = ()=>{
+        axios.post("/api/account", {
+            mainProfileName: profileName,
+            mainProfileAvatarNumber: avatarNumber
+        }, {
+            headers: {
+                Authorization: keycloak?.token
+            }
+        }).then(resp=>{
+            console.log(resp.data);
+            onAccountCreated();
+        }).catch(err=>{
+            console.error(err);
+        })
+    }
+
+    return (
+        <View style={styles.mainContainer}>
+            <View style={styles.contentContainer}>
+                <View style={styles.textContainer}>
+                    <Text style={[globalStyle.text, styles.text]}> Comece escolhendo seu perfil principal </Text>
+                </View>
+                <AvatarNavigator
+                    onAvatarChange={setAvatarNumber}
+                />
+                <BorderTextInput
+                    width={300}
+                    height={44}
+                    onChangeText={setProfileName}
+                    currentValue={profileName}
+                />
+            </View>
+            <View style={styles.buttonContainer}>
+                <ClickableButton
+                    width={340}
+                    height={44}
+                    text="Criar Perfil"
+                    onPress={onButtonPressed}
+
+                />
+            </View>
+        </View>
     )
 }
 
@@ -70,35 +155,66 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
         },
         addButtonContainer: {
             padding: 16
+        },
+        newProfileContentContainer: {
+            width: windowDimensions.width,
+            alignItems: "center",
+            justifyContent: "center"
         }
     });
 
 
     const onProfileChoice = (profile: Profile)=>{
-        navigation.navigate("Home", profile)
+        navigation.navigate("Home", {
+            profileKey: profile.profileKey
+        })
     }
     
+    const { keycloak } = useKeycloak();
     const [profiles, setProfiles] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [mainProfileName, setMainProfileName] = useState("");
     const onAddBttnPress = (event: GestureResponderEvent) =>{
         navigation.navigate("AddProfile");
     };
 
-    const { keycloak } = useKeycloak();
+    const retrieveProfiles = () => {
+        axios.get(`/api/account/${keycloak?.tokenParsed?.sub}`).then(res=>{
+            console.log("SUCCESS", res.data);
+            setProfiles(res.data.profiles)
+            setIsLoading(false)
+
+        }).catch((err)=>{
+            if(err.response && err.response.data.code == "ERR00001"){
+                setProfiles([])
+                setIsLoading(false)
+            }
+            else (
+                console.error("unexpected error", err)
+            )
+        })
+    }
 
     useFocusEffect(
         useCallback(()=>{
-            AsyncStorage.getItem("profiles").then((profiles)=>{
-                console.log(profiles);
-                if (!profiles){
-                    return
-                }
-                setProfiles(JSON.parse(profiles));
-            })
-            fetch("/api/account")
-                .then((res)=>res.json())
-                .then((json)=>console.log("finished fetch", json))
+            retrieveProfiles()
         }, [])
     );
+
+    if (isLoading){
+        return (
+            <Text style={{color: "black", fontSize: 40}}> LOADING ... </Text>
+        )
+    }
+
+    if (profiles.length == 0){
+        return (
+            <FirstAccessComponent onAccountCreated={()=>{
+                setIsLoading(true);
+                retrieveProfiles()
+            }}/>
+        )
+    }
 
     return (
         <View style={style.mainContainer}>
@@ -117,14 +233,6 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
                 screenWidth={windowDimensions.width}
                 style={style.maskedImage}
             />
-            <TouchableOpacity
-                onPress={()=>{keycloak?.logout().catch(err=>console.log(err))}}
-            >
-                <View style={{ width: 200, height: 100, alignSelf: "center", borderColor: "black", borderWidth: 1 }}>
-                    <Text style={{color: "black", fontSize: 30}}> {keycloak?.authenticated ? "YES" : "NO"} </Text>
-                </View>
-            </TouchableOpacity>
-
         </View>
     )
 }

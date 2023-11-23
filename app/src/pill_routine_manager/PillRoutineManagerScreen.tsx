@@ -5,10 +5,13 @@ import MainHeader from "../components/MainHeader";
 import { PillRoutine } from "../types/pill_routine"
 import ClickableButton from "../components/ClickabeButton";
 import { globalStyle } from "../style";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PillRoutineList from "./components/PillRoutineList";
 import { useFocusEffect } from "@react-navigation/native";
+import { ProfileKeyContext } from "../profile_picker/ProfileKeyContext";
+import axios from "axios";
+import { useKeycloak } from "@react-keycloak/native";
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "PillRoutineManager">;
 
@@ -28,6 +31,8 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
         }
     });
 
+    const {profileKey, setProfileKey} = useContext(ProfileKeyContext);
+
     useFocusEffect(useCallback(()=>{
         const getPillRoutines = async () => {
             setIsLoading(true);
@@ -45,17 +50,37 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
             setPillRoutines(pillRoutines);
             setIsLoading(false);
         }
+        const getProfile = async () => {
+            try {
+                const { data } = await axios.get(`api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`)
+                console.log(data);
+                
+                setProfileData({
+                    name: data.name,
+                    avatarNumber: data.avatarNumber
+                })
+            }
+            catch(err){
+                console.error(err);
+            }
+        }
 
+        getProfile()
         getPillRoutines()
     }, []))
 
+    const {keycloak} = useKeycloak()
+    const [profileData, setProfileData] = useState({
+        name: "",
+        avatarNumber: 0
+    })
     const [ pillRoutines, setPillRoutines ] = useState<PillRoutine[]>([]);
     const [ isLoading, setIsLoading ] = useState<boolean>(true);
 
     if(isLoading){
         return (
             <View>
-                <MainHeader profileName={route.params.name} avatarNumber={route.params.avatar}/>
+                <MainHeader profileName={profileKey} avatarNumber={0}/>
             </View>
         )
     }
@@ -63,7 +88,7 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
     if(pillRoutines.length == 0){
         return (
             <View>
-                <MainHeader profileName={route.params.name} avatarNumber={route.params.avatar}/>
+                <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
                 <View style={styles.textAndButtonContainer}>
                     <Text style={[globalStyle.text, styles.text]}>Comece adicionando sua primeira rotina de tratamento</Text>
                     <ClickableButton
@@ -79,7 +104,7 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
     else {
         return (
             <View>
-                <MainHeader profileName={route.params.name} avatarNumber={route.params.avatar}/>
+                <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
                 <PillRoutineList
                     pillRoutines={pillRoutines}
                 />

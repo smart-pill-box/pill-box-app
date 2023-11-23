@@ -39,7 +39,7 @@ export default function ProfileList({ profiles, onProfileClick }: ProfileListPro
                             <Avatar
                                 widht={100}
                                 height={100}
-                                avatarNumber={profile.avatar}
+                                avatarNumber={profile.avatarNumber}
                             />
                             <Text style={[styles.profileName, globalStyle.text]}> {profile.name} </Text>
                         </TouchableOpacity>
