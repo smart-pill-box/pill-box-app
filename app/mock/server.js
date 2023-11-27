@@ -10,6 +10,10 @@ export function makeServer(){
             }),
             profile: Model.extend({
                 account: belongsTo(),
+                pillRoutines: hasMany()
+            }),
+            pillRoutine: Model.extend({
+                profile: belongsTo()
             })
         },
     
@@ -17,7 +21,6 @@ export function makeServer(){
             this.namespace = "api"
             this.post("/account", function (schema, req){
                 try{
-                    console.log("lalala");
                     const attrs = JSON.parse(req.requestBody);
 
                     const account = schema.accounts.create({
@@ -54,7 +57,7 @@ export function makeServer(){
                 }
 
                 return {
-                    ...this.serialize(account),
+                    ...this.serialize(account).account,
                     ...this.serialize(account.profiles)
                 }
             })
@@ -75,6 +78,32 @@ export function makeServer(){
                 const profile = schema.profiles.findBy({ profileKey: req.params.profileKey })
 
                 return this.serialize(profile).profile;
+            })
+            this.get("/account/:accountKey/profile/:profileKey/pill_routines", function (schema, req){
+                const profile = schema.profiles.findBy({ profileKey: req.params.profileKey })
+                const pillRoutines = profile.pillRoutines;
+
+                if(!pillRoutines){
+                    return {
+                        data: []
+                    }
+                }
+
+                return {
+                    data: this.serialize(pillRoutines).pillRoutines
+                };
+            })
+            this.post("/account/:accountKey/profile/:profileKey/pill_routine", function(schema, req){
+                const body = JSON.parse(req.requestBody);
+                const profile = schema.profiles.findBy({ profileKey: req.params.profileKey });
+                const pillRoutine = schema.pillRoutines.create({
+                    pillRoutineKey: uuid.v4(),
+                    profile: profile,
+                    startDate: new Date().toISOString().split("T")[0],
+                    ...body
+                });
+
+                return this.serialize(pillRoutine).pillRoutine;
             })
 
             this.passthrough("http://192.168.0.8:8887/**")

@@ -10,6 +10,9 @@ import { DateTimePickerAndroid, DateTimePickerEvent } from "@react-native-commun
 import { TimesPerDayWeekdaysAnswers, TimesPerDayDayPeriodAnswers, TimesPerDayAnswers } from "./TimesPerDayScreen";
 import { DayPeriodPillRoutineData, WeekdaysPillRoutineData } from "../../types/pill_routine";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { ProfileKeyContext } from "../../profile_picker/ProfileKeyContext";
+import { useKeycloak } from "@react-keycloak/native";
 
 type WeekdaysAnswers = {
     monday?: string[];
@@ -122,20 +125,25 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
         })
     }
 
-    const validateAndFinish = ()=>{
+    const validateAndFinish = async ()=>{
         if(dosesArray.length != numberOfDoses){
             return
         }
 
         const payload = createPillRoutinePayload(pillRoutineForm, pickedTimesPerDose);
 
-        AsyncStorage.setItem("pillRoutines", JSON.stringify([payload])).then(()=>{
-            navigation.navigate("PillRoutineManager", route.params)
-        })
-
+        try {
+            const resp = await axios.post(`api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine`, payload)
+            
+            navigation.navigate("PillRoutineManager")
+        } catch(err){
+            console.error(err);
+        }
     }
 
     const { pillRoutineForm, setPillRoutineForm } = useContext(PillRoutineFormContext);
+    const {profileKey, setProfileKey} = useContext(ProfileKeyContext)
+    const { keycloak } = useKeycloak()
 
     const [ pickedTimesPerDose, setPickedTimesPerDose ] = useState<PickedTimesPerDose>({})
 

@@ -5,7 +5,7 @@
  * @format
  */
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import keycloakClient from './keycloak';
@@ -21,17 +21,18 @@ import { ReactNativeKeycloakProvider, useKeycloak } from '@react-keycloak/native
 import LoginScreen from './src/login/screens/LoginScreen';
 import { ProfileKeyContext } from './src/profile_picker/ProfileKeyContext';
 
-export type RootStackParamList = {
-  ProfilePicker: undefined;
-  AddProfile: undefined;
-  Login: undefined;
-  Home: {profileKey: string};
-}
 
 export type RootTabParamList = {
   PillCalendar: undefined;
   PillBoxManager: undefined;
   PillRoutineManagerNavigator: undefined;
+}
+
+export type RootStackParamList = {
+  ProfilePicker: undefined;
+  AddProfile: undefined;
+  Login: undefined;
+  Home: NavigatorScreenParams<RootTabParamList>;
 }
 
 const linking = {
@@ -50,14 +51,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 function Home({ route, navigation }: HomeProps): JSX.Element {
-  const [profile, setProfile] = useState<string>(route.params.profileKey);
 
   return (
-    <ProfileKeyContext.Provider value={{
-      profileKey: route.params.profileKey,
-      setProfileKey: setProfile
-    }}
-    >
       <Tab.Navigator initialRouteName="PillCalendar" screenOptions={{
         headerShown: false
       }}>
@@ -65,33 +60,39 @@ function Home({ route, navigation }: HomeProps): JSX.Element {
         <Tab.Screen name="PillRoutineManagerNavigator" component={PillRoutineManagerNavigator}/>
         <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen}/>
       </Tab.Navigator>
-    </ProfileKeyContext.Provider>
   )
 }
 
 function NavigatorContainer(){
   const { keycloak } = useKeycloak();
+  const [profileKey, setProfileKey] = useState<string>("");
   
   return (
     <NavigationContainer linking={linking}>
-    <Stack.Navigator
-    initialRouteName="ProfilePicker"
-    screenOptions={{
-      headerShown: false,
-    }}>
-      {keycloak?.authenticated ? (
-        <>
-        <Stack.Screen name="ProfilePicker" component={ProfilePickerScreen}/>
-        <Stack.Screen name="AddProfile" component={AddProfileScreen}/>
-        <Stack.Screen name="Home" component={Home}/>
-        </>
-      ) : (
-        <>
-        <Stack.Screen name="Login" component={LoginScreen}/>
-        </>
-      )
-      }
-    </Stack.Navigator>
+    <ProfileKeyContext.Provider value={{
+      profileKey: profileKey,
+      setProfileKey: setProfileKey
+    }}
+    >
+      <Stack.Navigator
+      initialRouteName="ProfilePicker"
+      screenOptions={{
+        headerShown: false,
+      }}>
+        {keycloak?.authenticated ? (
+          <>
+          <Stack.Screen name="ProfilePicker" component={ProfilePickerScreen}/>
+          <Stack.Screen name="AddProfile" component={AddProfileScreen}/>
+          <Stack.Screen name="Home" component={Home}/>
+          </>
+        ) : (
+          <>
+          <Stack.Screen name="Login" component={LoginScreen}/>
+          </>
+        )
+        }
+      </Stack.Navigator>
+    </ProfileKeyContext.Provider>
   </NavigationContainer>
   )
 }

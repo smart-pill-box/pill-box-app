@@ -29,5 +29,5 @@ interface PillRoutineBase {
 }
 
 export interface PillRoutine extends PillRoutineBase {
-    pillRoutineData: DayPeriodPillRoutineData | WeekdaysPillRoutineData
+    pillRoutineData: any
 }

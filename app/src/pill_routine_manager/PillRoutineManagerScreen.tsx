@@ -12,11 +12,17 @@ import { useFocusEffect } from "@react-navigation/native";
 import { ProfileKeyContext } from "../profile_picker/ProfileKeyContext";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/native";
+import AddButton from "../components/AddButton";
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "PillRoutineManager">;
 
 export default function PillRoutineManagerScreen({ route, navigation }: Props){
     const styles = StyleSheet.create({
+        mainContainer: {
+            alignItems: "center",
+            height: "100%",
+            gap: 16
+        },
         textAndButtonContainer: {
             flexDirection: "column",
             justifyContent: "space-between",
@@ -28,6 +34,11 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
             color: "#909090",
             textAlign: "center",
             fontSize: 32
+        },
+        addButtnContainer: {
+            position: "absolute",
+            bottom: 42,
+            right: 42
         }
     });
 
@@ -35,20 +46,15 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
 
     useFocusEffect(useCallback(()=>{
         const getPillRoutines = async () => {
-            setIsLoading(true);
-            const pillRoutinesStr = await AsyncStorage.getItem("pillRoutines");
-            if (!pillRoutinesStr){
-                return
+            try{
+                const resp = await axios.get(`/api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`)
+                
+                console.log(resp.data)
+                setPillRoutines(resp.data.data);
+            } 
+            catch(err){
+                console.error(err);
             }
-            const pillRoutines = JSON.parse(pillRoutinesStr);
-            if (!pillRoutines){
-                return
-            }
-            console.log("SDKJSDKJSDKJSDKJDSKSDJKDS");
-            console.log(pillRoutines);
-
-            setPillRoutines(pillRoutines);
-            setIsLoading(false);
         }
         const getProfile = async () => {
             try {
@@ -64,9 +70,13 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
                 console.error(err);
             }
         }
+        const run = async () => {
+            await getProfile();
+            await getPillRoutines();
+            setIsLoading(false)
+        }
 
-        getProfile()
-        getPillRoutines()
+        run();
     }, []))
 
     const {keycloak} = useKeycloak()
@@ -80,7 +90,7 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
     if(isLoading){
         return (
             <View>
-                <MainHeader profileName={profileKey} avatarNumber={0}/>
+
             </View>
         )
     }
@@ -94,7 +104,7 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
                     <ClickableButton
                         width={250}
                         height={60}
-                        onPress={()=>{navigation.navigate("NameDefinition", route.params)}}
+                        onPress={()=>{navigation.navigate("NameDefinition")}}
                         text="Vamos lá"
                     />
                 </View>
@@ -103,11 +113,17 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
     }
     else {
         return (
-            <View>
+            <View style={styles.mainContainer}>
                 <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
                 <PillRoutineList
                     pillRoutines={pillRoutines}
                 />
+                <View style={styles.addButtnContainer}>
+                    <AddButton
+                        size={44}
+                        onPress={()=>{navigation.navigate("NameDefinition")}}
+                    />
+                </View>
             </View>
         )
     }

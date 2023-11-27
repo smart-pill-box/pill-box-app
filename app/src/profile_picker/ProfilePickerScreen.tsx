@@ -8,7 +8,7 @@ import ProfileList from "./components/ProfileList"
 import MaskedView from "@react-native-masked-view/masked-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useKeycloak } from "@react-keycloak/native";
 import axios from "axios";
@@ -17,6 +17,7 @@ import AvatarNavigator from "./components/AvatarNavigator";
 import { globalStyle } from "../style";
 import SelectableButton from "../pill_routine_manager/components/SelectableButton";
 import ClickableButton from "../components/ClickabeButton";
+import { ProfileKeyContext } from "./ProfileKeyContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProfilePicker">
 type MaskedPillsImageProps = {
@@ -53,7 +54,7 @@ function MaskedPillsImage({imgHeight, imgWidth, screenWidth, style}: MaskedPills
     )
 };
 
-function FirstAccessComponent({ onAccountCreated }: {onAccountCreated: ()=>void}){
+function FirstAccessComponent({ onAccountCreated }: {onAccountCreated: (newAccount: any)=>void}){
     const windowDimensions = useWindowDimensions();
     const { keycloak } = useKeycloak();
 
@@ -96,8 +97,7 @@ function FirstAccessComponent({ onAccountCreated }: {onAccountCreated: ()=>void}
                 Authorization: keycloak?.token
             }
         }).then(resp=>{
-            console.log(resp.data);
-            onAccountCreated();
+            onAccountCreated(resp.data);
         }).catch(err=>{
             console.error(err);
         })
@@ -165,10 +165,13 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
 
 
     const onProfileChoice = (profile: Profile)=>{
+        setProfileKey(profile.profileKey);
         navigation.navigate("Home", {
-            profileKey: profile.profileKey
-        })
+            screen: "PillCalendar"
+        });
     }
+
+    const {profileKey, setProfileKey} = useContext(ProfileKeyContext);
     
     const { keycloak } = useKeycloak();
     const [profiles, setProfiles] = useState([]);
@@ -180,7 +183,6 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
 
     const retrieveProfiles = () => {
         axios.get(`/api/account/${keycloak?.tokenParsed?.sub}`).then(res=>{
-            console.log("SUCCESS", res.data);
             setProfiles(res.data.profiles)
             setIsLoading(false)
 
@@ -209,10 +211,14 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
 
     if (profiles.length == 0){
         return (
-            <FirstAccessComponent onAccountCreated={()=>{
-                setIsLoading(true);
-                retrieveProfiles()
-            }}/>
+            <FirstAccessComponent
+                onAccountCreated={(newAccount: any)=>{
+                    setProfileKey(newAccount.profiles[0].profileKey);
+                    navigation.navigate("Home", {
+                        screen: "PillRoutineManagerNavigator"
+                    })
+                }}
+            />
         )
     }
 

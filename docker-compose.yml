@@ -14,8 +14,9 @@ services:
       - "5432:5432"
 
   keycloak:
-    build: "./keycloak"
-    command: ["start-dev", "--http-port 8887"]
+    build: "./keycloak/."
+    command: 
+      [ "start-dev", "--http-port 8887" ]
     depends_on:
       - db
     ports:

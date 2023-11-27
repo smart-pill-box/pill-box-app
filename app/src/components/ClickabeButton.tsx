@@ -9,9 +9,10 @@ interface ClickableButtonProps {
   text: string;
   isEnabled?: boolean;
   buttonStyle?: object;
+  textStyle?: any;
 }
 
-export default function ClickableButton({ width, height, onPress, text, isEnabled, buttonStyle }: ClickableButtonProps){
+export default function ClickableButton({ width, height, onPress, text, isEnabled, buttonStyle, textStyle }: ClickableButtonProps){
     if (isEnabled == undefined){
         isEnabled = true
     }
@@ -32,7 +33,7 @@ export default function ClickableButton({ width, height, onPress, text, isEnable
   return (
     <TouchableOpacity onPress={onPress} disabled={!isEnabled}>
       <View style={[styles.buttonContainer, { width, height }, buttonStyle]}>
-        <Text style={[globalStyle.text, styles.buttonText]}> {text} </Text>
+        <Text style={[globalStyle.text, styles.buttonText, textStyle]}> {text} </Text>
       </View>
     </TouchableOpacity>
   );

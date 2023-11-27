@@ -42,7 +42,8 @@ export default function ScrollableDatePicker({ startDate, onDateSelection }: Scr
         return StyleSheet.create({
             mainContainer: {
                 flexDirection: "column",
-                alignItems: "flex-end"
+                alignItems: "flex-end",
+                paddingBottom: 16
             },
             scrollContainer: {
                 flexDirection: "row",
@@ -69,6 +70,7 @@ export default function ScrollableDatePicker({ startDate, onDateSelection }: Scr
     const onBackPressed = ()=>{
         flatlistRef.current?.scrollToIndex({animated: true, index: startDateIndex});
         setSelectedIndex(startDateIndex);
+        onDateSelection(dateList[startDateIndex].date);
     }
 
     const flatlistRef = useRef<FlatList<DateItem>>(null);
