@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { PillRoutineStackParamList } from "../PillRoutineManagerNavigator";
-import ClickableButton from "../../components/ClickabeButton";
-import { globalStyle } from "../../style";
-import FormsHeader from "../components/FormsHeader";
-import BorderTextInput from "../../profile_picker/components/BorderTextInput";
+import { PillRoutineStackParamList } from "../../PillRoutineManagerNavigator";
+import ClickableButton from "../../../components/ClickabeButton";
+import { globalStyle } from "../../../style";
+import FormsHeader from "../../components/FormsHeader";
+import BorderTextInput from "../../../profile_picker/components/BorderTextInput";
 import { useContext, useState } from "react";
-import { PillRoutineForm, PillRoutineFormContext, PillRoutineFormContextType } from "../PillRoutineFormContext";
+import { PillRoutineForm, PillRoutineFormContext, PillRoutineFormContextType } from "../../PillRoutineFormContext";
 
 export type NameDefinitionAnswers = {
     name: string

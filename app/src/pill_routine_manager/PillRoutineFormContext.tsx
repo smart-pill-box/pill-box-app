@@ -1,9 +1,9 @@
 import { createContext } from "react";
-import { RoutineTypeAnswers } from "./screens/RoutineTypeScreen";
-import { NameDefinitionAnswers } from "./screens/NameDefinitionScreen";
-import { WeekdaysPickerAnswers } from "./screens/WeekdaysPickerScreen";
-import { TimesPerDayAnswers } from "./screens/TimesPerDayScreen";
-import { DoseTimePickerAnswers } from "./screens/DoseTimePickerScreen";
+import { RoutineTypeAnswers } from "./screens/create_pill_routine/RoutineTypeScreen";
+import { NameDefinitionAnswers } from "./screens/create_pill_routine/NameDefinitionScreen";
+import { WeekdaysPickerAnswers } from "./screens/create_pill_routine/WeekdaysPickerScreen";
+import { TimesPerDayAnswers } from "./screens/create_pill_routine/TimesPerDayScreen";
+import { DoseTimePickerAnswers } from "./screens/create_pill_routine/DoseTimePickerScreen";
 
 export type PillRoutineType = "weekdays" | "everyday" | "dayPeriod";
 

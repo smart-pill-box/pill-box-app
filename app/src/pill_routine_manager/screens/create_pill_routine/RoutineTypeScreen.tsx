@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { PillRoutineStackParamList } from "../PillRoutineManagerNavigator";
-import FormsHeader from "../components/FormsHeader";
+import { PillRoutineStackParamList } from "../../PillRoutineManagerNavigator";
+import FormsHeader from "../../components/FormsHeader";
 import { useContext, useState } from "react";
-import { PillRoutineForm, PillRoutineFormContext, PillRoutineFormContextType, PillRoutineType } from "../PillRoutineFormContext";
-import SelectableButton from "../components/SelectableButton";
-import { globalStyle } from "../../style";
-import ClickableButton from "../../components/ClickabeButton";
+import { PillRoutineForm, PillRoutineFormContext, PillRoutineFormContextType, PillRoutineType } from "../../PillRoutineFormContext";
+import SelectableButton from "../../components/SelectableButton";
+import { globalStyle } from "../../../style";
+import ClickableButton from "../../../components/ClickabeButton";
 
 export type RoutineTypeAnswers = {
     routineType: "weekdays" | "dayPeriod"

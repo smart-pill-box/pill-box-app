@@ -18,7 +18,8 @@ export default function FormsHeader({ onBackPressed, pillName }: FormsHeaderProp
             width: "100%",
         },
         primaryContainer: {
-            paddingBottom: 32
+            paddingBottom: 32,
+            width: "100%",
         },
         text: {
             fontSize: 24,

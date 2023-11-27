@@ -1,18 +1,19 @@
 import { StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { PillRoutineStackParamList } from "../PillRoutineManagerNavigator";
-import ClickableButton from "../../components/ClickabeButton";
-import { globalStyle } from "../../style";
-import FormsHeader from "../components/FormsHeader";
+import { PillRoutineStackParamList } from "../../PillRoutineManagerNavigator";
+import ClickableButton from "../../../components/ClickabeButton";
+import { globalStyle } from "../../../style";
+import FormsHeader from "../../components/FormsHeader";
 import { useContext, useState } from "react";
-import { PillRoutineForm, PillRoutineFormContext } from "../PillRoutineFormContext";
+import { PillRoutineForm, PillRoutineFormContext } from "../../PillRoutineFormContext";
 import { DateTimePickerAndroid, DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { TimesPerDayWeekdaysAnswers, TimesPerDayDayPeriodAnswers, TimesPerDayAnswers } from "./TimesPerDayScreen";
-import { DayPeriodPillRoutineData, WeekdaysPillRoutineData } from "../../types/pill_routine";
+import { DayPeriodPillRoutineData, WeekdaysPillRoutineData } from "../../../types/pill_routine";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { ProfileKeyContext } from "../../profile_picker/ProfileKeyContext";
+import { ProfileKeyContext } from "../../../profile_picker/ProfileKeyContext";
 import { useKeycloak } from "@react-keycloak/native";
+import DoseTime from "../../components/DoseTime";
 
 type WeekdaysAnswers = {
     monday?: string[];
@@ -31,89 +32,12 @@ type DayPeriodAnswers = {
 export type DoseTimePickerAnswers = WeekdaysAnswers | DayPeriodAnswers
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "DoseTimePicker">;
-type DoseProps = {
-    doseNumber: number;
-    selectedTime?: string
-    onTimePicked: (event: DateTimePickerEvent, selectedDate?: Date)=>void;
-}
+
 type PickedTimesPerDose = {[key: number]: string};
 
-function Dose({doseNumber, selectedTime, onTimePicked}: DoseProps){
-    const styles = StyleSheet.create({
-        doseContainer: {
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 24
-        },
-        timeContainer: {
-            width: 80,
-            height: 60,
-            borderWidth: 1,
-            borderColor: "black"
-        },
-        timeText: {
-            fontSize: 24,
-            width: "100%",
-            height: "100%",
-            textAlign: "center",
-            textAlignVertical: "center"
-        }
-    });
 
-    return (
-        <View style={styles.doseContainer}>
-            <Text style={[globalStyle.text]}>{doseNumber+1}° Dose </Text>
-            <TouchableWithoutFeedback onPress={()=>{
-                DateTimePickerAndroid.open({
-                    value: new Date(),
-                    onChange: onTimePicked,
-                    mode: "time",
-                    is24Hour: true
-                })
-            }}>
-                <View style={styles.timeContainer}>
-                    { selectedTime ? <Text style={[globalStyle.text, styles.timeText]}> {selectedTime} </Text> : undefined }
-                </View>
-            </TouchableWithoutFeedback>
-        </View>
-    )
-}
 
 export default function DoseTimePickerScreen({ route, navigation }: Props){
-    const styles = StyleSheet.create({
-        mainContainer: {
-            flexDirection: "column",
-            justifyContent: "space-between",
-            gap: 40,
-            paddingHorizontal: 28
-        },
-        text: {
-            color: "#575757",
-            width: "100%",
-            fontSize: 24
-        },
-        dosesContainer: {
-            flexDirection: "column",
-            justifyContent: "center",
-            alignContent: "center",
-            width: "100%",
-            gap: 24
-        },
-        doseContainer: {
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 24
-        },
-        nextButtonContainer: {
-            position: "absolute",
-            width: "100%",
-            paddingHorizontal: 16,
-            bottom: 16
-        }
-    });
-
     const setDateByIndex = (index: number, selectedDate?: Date)=>{
         if (!selectedDate){
             return
@@ -164,7 +88,7 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
                 <Text style={[globalStyle.text, styles.text]}> Em quais horários você tomará as doses desse remédio? </Text>
                 <View style={styles.dosesContainer}>
                     { dosesArray.map((_, index)=>(
-                        <Dose
+                        <DoseTime
                             doseNumber={index}
                             selectedTime={pickedTimesPerDose[index]}
                             onTimePicked={(event: DateTimePickerEvent, selectedDate?: Date)=>{setDateByIndex(index, selectedDate)}}
@@ -186,6 +110,39 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    mainContainer: {
+        flexDirection: "column",
+        justifyContent: "space-between",
+        gap: 40,
+        paddingHorizontal: 28
+    },
+    text: {
+        color: "#575757",
+        width: "100%",
+        fontSize: 24
+    },
+    dosesContainer: {
+        flexDirection: "column",
+        justifyContent: "center",
+        alignContent: "center",
+        width: "100%",
+        gap: 24
+    },
+    doseContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 24
+    },
+    nextButtonContainer: {
+        position: "absolute",
+        width: "100%",
+        paddingHorizontal: 16,
+        bottom: 16
+    }
+});
 
 const createPillRoutinePayload = (pillRoutineForm: PillRoutineForm, pickedTimesPerDose: PickedTimesPerDose)=>{
     const routineType = pillRoutineForm.routineTypeAnswers?.routineType ?? "dayPeriod";

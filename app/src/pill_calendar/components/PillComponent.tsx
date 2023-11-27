@@ -4,6 +4,7 @@ import { globalStyle } from "../../style";
 import ClockImage from "../assets/ClockImage";
 import ClickableButton from "../../components/ClickabeButton";
 import { useEffect, useRef, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 
 export default function PillComponent({ pill }: {pill: Pill}){
     const [isSelected, setisSelected] = useState(false);
@@ -21,12 +22,12 @@ export default function PillComponent({ pill }: {pill: Pill}){
         Animated.parallel([
             Animated.timing(dropDownAnimHeight, {
                 toValue: toHeight,
-                duration: 500,
+                duration: 100,
                 useNativeDriver: false
             }),
             Animated.timing(dropDownAnimTop, {
                 toValue: toTop,
-                duration: 500,
+                duration: 100,
                 useNativeDriver: false
             })
         ]).start()

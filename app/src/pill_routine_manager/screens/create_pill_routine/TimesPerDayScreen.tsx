@@ -1,13 +1,13 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { PillRoutineStackParamList } from "../PillRoutineManagerNavigator";
+import { PillRoutineStackParamList } from "../../PillRoutineManagerNavigator";
 import { useContext, useState } from "react";
-import { PillRoutineForm, PillRoutineFormContext } from "../PillRoutineFormContext";
-import FormsHeader from "../components/FormsHeader";
-import { globalStyle } from "../../style";
-import ClickableButton from "../../components/ClickabeButton";
-import BorderTextInput from "../../profile_picker/components/BorderTextInput";
+import { PillRoutineForm, PillRoutineFormContext } from "../../PillRoutineFormContext";
+import FormsHeader from "../../components/FormsHeader";
+import { globalStyle } from "../../../style";
+import ClickableButton from "../../../components/ClickabeButton";
+import BorderTextInput from "../../../profile_picker/components/BorderTextInput";
 
 export type TimesPerDayWeekdaysAnswers = {
     monday?: number;
