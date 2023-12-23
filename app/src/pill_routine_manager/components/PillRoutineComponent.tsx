@@ -28,7 +28,12 @@ const getDescriptionText = (pillRoutine: PillRoutine)=>{
         weekdays.forEach((weekday)=>{
             text += `${weekdayTradutor[weekday]}, `
         })
-        return text;
+        if (weekdays.length > 1){
+            return text.slice(0, -7) + " e " + text.slice(-5, -2);
+        }
+        else {
+            return text.slice(0, -2);
+        }
     }
     else if(pillRoutine.pillRoutineType == "dayPeriod"){
         return `A cada ${pillRoutine.pillRoutineData.periodInDays} dias`

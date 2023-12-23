@@ -28,8 +28,21 @@ services:
       - KC_DB_URL=jdbc:postgresql://db:5432/keycloak
       - KC_DB_USERNAME=my_user
       - KC_DB_PASSWORD=my_pwd
-      - KC_HOSTNAME=192.168.0.8
+      - KC_HOSTNAME=192.168.0.23
       - KC_HOSTNAME_PORT=8887
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI=true
+
+  app:
+    build: "../medicine-api/."
+    command: "npm run dev"
+    working_dir: /home/node/app
+    environment:
+      - TZ=America/Sao_Paulo
+    env_file:
+      - environment.env
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"

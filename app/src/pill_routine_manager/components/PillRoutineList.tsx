@@ -53,6 +53,9 @@ export default function PillRoutineList({ pillRoutines }: Props){
     return (
         <ScrollView contentContainerStyle={styles.scroolContainerStyle} style={styles.scroolStyle}>
             {pillRoutines.map((pillRoutine)=>{
+                if (["updated", "canceled"].includes(pillRoutine.status)){
+                    return
+                }
                 return (
                     <PillRoutineComponent pillRoutine={pillRoutine} key={pillRoutine.pillRoutineKey}/>
                 )

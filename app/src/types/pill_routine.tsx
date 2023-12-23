@@ -21,10 +21,10 @@ interface PillRoutineStatusEvent {
 interface PillRoutineBase {
     pillRoutineKey: string;
     name: string;
-    status: "active" | "canceled";
+    status: "active" | "canceled" | "updated";
     pillRoutineType: "weekdays" | "dayPeriod";
-    startDate: string;
-    expirationDate?: string;
+    startDatetime: string;
+    expirationDatetime?: string;
     statusEvents: PillRoutineStatusEvent[]
 }
 

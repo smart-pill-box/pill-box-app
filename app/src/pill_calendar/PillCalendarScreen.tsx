@@ -14,10 +14,20 @@ import PillList from './components/PillList';
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillCalendar">
 
+type PillStatus = "pending" | "manualyConfirmed" | "pillBoxConfirmed" | "canceled"
+
+export type PillStatusEvent = {
+    status: PillStatus,
+    eventDatetime: Date | string
+}
+
 export type Pill = {
-    id: number;
     name: string;
-    timeStr: string;
+    pillDatetime: Date;
+    pillRoutineKey: string;
+    status: PillStatus;
+    statusEvents: PillStatusEvent[]
+
 }
 
 const weekdaysNumberToStr: {[key: number]: string} = {
@@ -28,36 +38,6 @@ const weekdaysNumberToStr: {[key: number]: string} = {
     5: "friday",
     6: "saturday",
     0: "sunday",
-}
-
-const getTodayPills = (pillRoutines: PillRoutine[], today: Date)=>{
-    let todayPills: Pill[] = [];
-    let id = 0;
-
-    pillRoutines.forEach((pillRoutine: PillRoutine)=>{
-        const pillName = pillRoutine.name;
-        if (new Date(Date.parse(pillRoutine.startDate)) > today){
-            return
-        }
-
-        if (pillRoutine.pillRoutineType == "weekdays"){
-            const weekdays = Object.keys(pillRoutine.pillRoutineData);
-
-            if(weekdays.includes(weekdaysNumberToStr[today.getDay()])){
-                pillRoutine.pillRoutineData[weekdaysNumberToStr[today.getDay()]].forEach((timeStr: string)=>{
-                    todayPills.push({
-                        name: pillName,
-                        timeStr: timeStr,
-                        id: id
-                    });
-            
-                    id += 1
-                })
-            }
-        }
-    })
-
-    return todayPills;
 }
 
 function NoPillContainer(){
@@ -91,7 +71,7 @@ function NoPillContainer(){
             <View style={styles.textContainer}>
                 <Text 
                     style={[globalStyle.text, styles.text]}
-                > Sem remédios para hoje! </Text>
+                > Sem remédios nesse dia! </Text>
             </View>
             <View style={styles.imageContainer}>
                 <Image
@@ -106,7 +86,7 @@ function NoPillContainer(){
 
 export default function PillCalendarScreen({ route, navigation }: Props){
     const initialDate = new Date();
-    const {keycloak} = useKeycloak()
+    const { keycloak } = useKeycloak()
     const [ selectedDate, setSelectedDate ] = useState<Date>(initialDate)
     const [ pillRoutines, setPillRoutines ] = useState<PillRoutine[]>([])
     const { profileKey, setProfileKey } = useContext(ProfileKeyContext)
@@ -122,7 +102,11 @@ export default function PillCalendarScreen({ route, navigation }: Props){
         useCallback(()=>{
             const getPillRoutines = async () => {
                 try{
-                    const resp = await axios.get(`/api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`)
+                    const resp = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
+                        headers: {
+                            Authorization: keycloak?.token
+                        }
+                    })
                     
                     console.log(resp.data)
                     setPillRoutines(resp.data.data);
@@ -133,7 +117,11 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             }
             const getProfile = async () => {
                 try {
-                    const { data } = await axios.get(`api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`)
+                    const { data } = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
+                        headers: {
+                            Authorization: keycloak?.token
+                        }
+                    })
                     console.log(data);
                     
                     setProfileData({
@@ -151,12 +139,67 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     );
 
     useEffect(()=>{
-        setTodayPills(getTodayPills(pillRoutines, selectedDate));
-        console.log(todayPills);
+        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
     }, [selectedDate, pillRoutines])
 
     const onDateSelection = (date: Date)=>{
         setSelectedDate(date);
+    }
+
+    const getPillsOnDate = async (pillRoutines: PillRoutine[], today: Date)=>{
+        const response = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pills?fromDate=${today.toISOString().split("T")[0]}&toDate=${today.toISOString().split("T")[0]}`, {
+            headers: {
+                Authorization: keycloak?.token
+            }
+        });
+        console.log(response.data)
+        
+        let pillsOnDate: Pill[] = [];
+        response.data.data.forEach((pill: any)=>{
+            const pillDatetime = new Date(pill.pillDatetime);
+
+            if (
+                pillDatetime.getDate == today.getDate 
+                && pillDatetime.getMonth == today.getMonth
+                && pillDatetime.getFullYear == today.getFullYear
+            ){
+                pillsOnDate.push({
+                    pillDatetime: pillDatetime,
+                    name: pill.name,
+                    pillRoutineKey: pill.pillRoutineKey,
+                    status: pill.status,
+                    statusEvents: pill.statusEvents
+                })
+            }
+        })
+
+        console.log("Today pills are ", pillsOnDate)
+    
+        return pillsOnDate;
+    }
+
+    const onPillManualyConsumed = async (pill: Pill)=>{
+        await axios.put(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
+            status: "manualyConfirmed",
+        }, {
+            headers: {
+                Authorization: keycloak?.token
+            }
+        });
+
+        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
+    }
+
+    const onPillDeleted = async (pill: Pill)=>{
+        await axios.put(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
+            status: "canceled",
+        }, {
+            headers: {
+                Authorization: keycloak?.token
+            }
+        });
+
+        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
     }
     
     if (todayPills.length == 0){
@@ -170,11 +213,15 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     }
 
     return (
-        <View style={{height: "100%"}}>
+    <View style={{height: "100%"}}>
         <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
         <ScrollableDatePicker startDate={initialDate} onDateSelection={onDateSelection}/>
         <PillList
             pills={todayPills}
+            onPillDelete={onPillDeleted}
+            onPillManualConsumed={onPillManualyConsumed}
+            onPillReeschadule={(pill)=>{}}
+            componentIfEmpty={<NoPillContainer/>}
         />
     </View>
     )

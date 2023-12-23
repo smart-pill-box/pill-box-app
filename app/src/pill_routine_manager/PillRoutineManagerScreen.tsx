@@ -47,7 +47,11 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
     useFocusEffect(useCallback(()=>{
         const getPillRoutines = async () => {
             try{
-                const resp = await axios.get(`/api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`)
+                const resp = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
+                    headers: {
+                        Authorization: keycloak?.token
+                    }
+                })
                 
                 console.log(resp.data)
                 setPillRoutines(resp.data.data);
@@ -58,7 +62,11 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
         }
         const getProfile = async () => {
             try {
-                const { data } = await axios.get(`api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`)
+                const { data } = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
+                    headers: {
+                        Authorization: keycloak?.token
+                    }
+                })
                 console.log(data);
                 
                 setProfileData({

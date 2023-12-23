@@ -89,7 +89,7 @@ function FirstAccessComponent({ onAccountCreated }: {onAccountCreated: (newAccou
     const [avatarNumber, setAvatarNumber] = useState(0)
     const [profileName, setProfileName] = useState("")
     const onButtonPressed = ()=>{
-        axios.post("/api/account", {
+        axios.post("http://192.168.0.23:8080/account", {
             mainProfileName: profileName,
             mainProfileAvatarNumber: avatarNumber
         }, {
@@ -182,7 +182,11 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
     };
 
     const retrieveProfiles = () => {
-        axios.get(`/api/account/${keycloak?.tokenParsed?.sub}`).then(res=>{
+        axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}`, {
+            headers: {
+                Authorization: keycloak?.token
+            }
+        }).then(res=>{
             setProfiles(res.data.profiles)
             setIsLoading(false)
 
@@ -192,7 +196,7 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
                 setIsLoading(false)
             }
             else (
-                console.error("unexpected error", err)
+                console.error(err)
             )
         })
     }

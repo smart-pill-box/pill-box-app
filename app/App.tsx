@@ -20,6 +20,9 @@ import PillRoutineManagerNavigator from './src/pill_routine_manager/PillRoutineM
 import { ReactNativeKeycloakProvider, useKeycloak } from '@react-keycloak/native';
 import LoginScreen from './src/login/screens/LoginScreen';
 import { ProfileKeyContext } from './src/profile_picker/ProfileKeyContext';
+import PillIcon from './src/components/bottomTabIcons/PillIcon';
+import CalendarIcon from './src/components/bottomTabIcons/CalendarIcon';
+import DeviceIcon from './src/components/bottomTabIcons/DeviceIcon';
 
 
 export type RootTabParamList = {
@@ -54,11 +57,18 @@ function Home({ route, navigation }: HomeProps): JSX.Element {
 
   return (
       <Tab.Navigator initialRouteName="PillCalendar" screenOptions={{
-        headerShown: false
+        headerShown: false,
+        tabBarShowLabel: false
       }}>
-        <Tab.Screen name="PillCalendar" component={PillCalendarScreen}/>
-        <Tab.Screen name="PillRoutineManagerNavigator" component={PillRoutineManagerNavigator}/>
-        <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen}/>
+        <Tab.Screen name="PillRoutineManagerNavigator" component={PillRoutineManagerNavigator} options={{
+          tabBarIcon: PillIcon
+        }}/>
+        <Tab.Screen name="PillCalendar" component={PillCalendarScreen} options={{
+          tabBarIcon: CalendarIcon
+        }}/>
+        <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen} options={{
+          tabBarIcon: DeviceIcon
+        }}/>
       </Tab.Navigator>
   )
 }

@@ -14,6 +14,9 @@ export function makeServer(){
             }),
             pillRoutine: Model.extend({
                 profile: belongsTo()
+            }),
+            pill: Model.extend({
+                pillRoutine: belongsTo()
             })
         },
     
@@ -93,17 +96,59 @@ export function makeServer(){
                     data: this.serialize(pillRoutines).pillRoutines
                 };
             });
-            this.post("/account/:accountKey/profile/:profileKey/pill_routine", function(schema, req){
-                const body = JSON.parse(req.requestBody);
-                const profile = schema.profiles.findBy({ profileKey: req.params.profileKey });
-                const pillRoutine = schema.pillRoutines.create({
-                    pillRoutineKey: uuid.v4(),
-                    profile: profile,
-                    startDate: new Date().toISOString().split("T")[0],
-                    ...body
-                });
+            this.get("/account/:accountKey/profile/:profileKey/pills", function (schema, req){
+                try{
+                    const filteredDate = new Date(JSON.parse(req.queryParams).pillDate);
 
-                return this.serialize(pillRoutine).pillRoutine;
+                    const pills = schema.pills.filter(pill=>{
+                        const pillDate = new Date(pill.pillDatetime);
+
+                        return (
+                            pillDate.getDate() == filteredDate.getDate() &&
+                            pillDate.getMonth() == filteredDate.getMonth() &&
+                            pillDate.getFullYear() == filteredDate.getFullYear() &&
+                            pill.pillRoutine.profile.profileKey == profileKey
+                        )
+                    })
+
+                    if(!pills){
+                        return {
+                            data: []
+                        }
+                    }
+
+                    let data = [];
+
+                    pills.forEach(pill=>{
+                        data.push({
+                            ...this.serialize(pill).pill,
+                            pillRoutine: this.serialize(pill.pillRoutine).pillRoutine
+                        })
+                    })
+
+                    return {
+                        data: data
+                    };
+                } catch(err){
+                    console.error(err);
+                }
+            });
+            this.post("/account/:accountKey/profile/:profileKey/pill_routine", function(schema, req){
+                try{
+                    const body = JSON.parse(req.requestBody);
+                    const profile = schema.profiles.findBy({ profileKey: req.params.profileKey });
+                    const pillRoutine = schema.pillRoutines.create({
+                        pillRoutineKey: uuid.v4(),
+                        profile: profile,
+                        startDate: new Date().toISOString().split("T")[0],
+                        ...body
+                    });
+
+                    return this.serialize(pillRoutine).pillRoutine;
+                } catch(err){
+                    console.error(err)
+                }
+
             });
             this.get("/account/:accountKey/profile/:profileKey/pill_routine/:pillRoutineKey", function (schema, req){
                 const pillRoutine = schema.pillRoutines.findBy({ pillRoutineKey: req.params.pillRoutineKey })
@@ -112,10 +157,12 @@ export function makeServer(){
             });
             this.put("/account/:accountKey/profile/:profileKey/pill_routine/:pillRoutineKey", function(schema, req){
                 try{
+                    console.log("cucucucu", req.requestBody);
                     const body = JSON.parse(req.requestBody);
+                    const pillRoutine = schema.pillRoutines.findBy({ pillRoutineKey: req.params.pillRoutineKey });
+
                     console.log("BODY   ", body);
                     console.log("PARAM  ", req.params.pillROutineKey);
-                    const pillRoutine = schema.pillRoutines.findBy({ pillRoutineKey: req.params.pillRoutineKey });
                     pillRoutine.update({
                         ...body
                     });
@@ -125,8 +172,27 @@ export function makeServer(){
                     console.error(err)
                 }
             });
+            this.put("/account/:accountKey/profile/:profileKey/pill_routine/:pillRoutineKey/pill/:pillDatetime/status", function(schema, req){
+                const pillRoutine = schema.pillRoutines.findBy({ pillRoutineKey: req.params.pillRoutineKey });
+                const body = JSON.parse(req.requestBody);
+                const pillDatetime = body.pillDatetime;
+                const status = body.status;
+                let confirmationInterval;
 
-            this.passthrough("http://192.168.0.8:8887/**")
+                if (status == "manualyConfirmed" || status == "pillBoxConfirmed"){
+                    confirmationInterval = (Date.parse(pillDatetime).getTime() - (new Date()).getTime())/1000
+                }
+
+                const pill = schema.pills.create({
+                    pillRoutine: pillRoutine,
+                    ...(confirmationInterval && {confirmationInterval: confirmationInterval} ),
+                    ...body
+                })
+
+                return this.serialize(pill).pill;
+            });
+
+            this.passthrough("http://192.168.0.23:8887/**")
         },
     
         seeds(server) {

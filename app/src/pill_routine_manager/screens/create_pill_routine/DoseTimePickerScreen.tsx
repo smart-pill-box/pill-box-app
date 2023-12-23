@@ -57,7 +57,11 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
         const payload = createPillRoutinePayload(pillRoutineForm, pickedTimesPerDose);
 
         try {
-            const resp = await axios.post(`api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine`, payload)
+            const resp = await axios.post(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine`, payload, {
+                headers: {
+                    Authorization: keycloak?.token
+                }
+            })
             
             navigation.navigate("PillRoutineManager")
         } catch(err){

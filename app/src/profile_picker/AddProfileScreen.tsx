@@ -68,9 +68,13 @@ export default function AddProfileScreen({ route, navigation }: Props){
     const onCreatePressed = async ()=>{
         setIsButtonEnabled(false);
         try{
-            await axios.post(`api/account/${keycloak?.tokenParsed?.sub}/profile`, {
+            await axios.post(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile`, {
                 name: newProfileName,
                 avatarNumber: avatarNumber
+            }, {
+                headers: {
+                    Authorization: keycloak?.token
+                }
             })
 
             navigation.navigate("ProfilePicker");

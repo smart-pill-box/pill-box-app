@@ -69,7 +69,18 @@ export default function EditPillRoutineScreen({ route, navigation }: Props){
     }
     const saveAndBack = async ()=>{
         console.log(pillRoutine);
-        await axios.put(`/api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`, pillRoutine);
+        const payload = {...pillRoutine};
+        delete payload.statusEvents;
+        delete payload.pillRoutineKey;
+        delete payload.name;
+        delete payload.status;
+        delete payload.startDatetime;
+
+        await axios.put(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`, payload, {
+            headers: {
+                Authorization: keycloak?.token
+            }
+        });
 
         navigation.goBack();
     }
@@ -83,7 +94,11 @@ export default function EditPillRoutineScreen({ route, navigation }: Props){
         useCallback(()=>{
             const getPillRoutine = async () => {
                 try{
-                    const resp = await axios.get(`/api/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`)
+                    const resp = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`, {
+                        headers: {
+                            Authorization: keycloak?.token
+                        }
+                    })
                     
                     setPillRoutine(resp.data);
                     setIsLoading(false);
@@ -216,6 +231,9 @@ const getFrequencyDetailsText = (pillRoutine: PillRoutine)=>{
     }
     else {
         let text = "Tomar toda ";
+        if(["sunday", "saturday"].includes(weekdays[0])){
+            text = "Tomar todo ";
+        }
 
         weekdays.forEach((weekday: string)=>{
             text += `${weekdayTradutor[weekday]}, `

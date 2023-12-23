@@ -1,8 +1,18 @@
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Pill } from "../PillCalendarScreen";
 import PillComponent from "./PillComponent";
+import { useState } from "react";
 
-export default function PillList({ pills }: {pills: Pill[]}){
+type Props = {
+    pills: Pill[];
+    onPillReeschadule: (pill: Pill)=>void;
+    onPillDelete: (pill: Pill)=>void;
+    onPillManualConsumed: (pill: Pill)=>void;
+    componentIfEmpty: React.JSX.Element
+}
+
+
+export default function PillList({ pills, onPillReeschadule, onPillDelete, onPillManualConsumed, componentIfEmpty }: Props){
     const styes = StyleSheet.create({
         scroolContainer: {
             gap: 16,
@@ -10,18 +20,30 @@ export default function PillList({ pills }: {pills: Pill[]}){
         }
     })
 
+    let haveSomePill = false;
+    
+    const pillsComponents = pills.map((pill: Pill, index)=>{
+        if(pill.status == "canceled"){
+            return
+        }
+        haveSomePill = true;
+        return (
+            <PillComponent
+            key={index}
+            pill={pill}
+            onPillManualConsumed={onPillManualConsumed}
+            onPillDelete={onPillDelete}
+            onPillReeschadule={onPillReeschadule}
+            />
+            )
+        });
+
+        if(!haveSomePill){
+            return componentIfEmpty
+        }
     return (
         <ScrollView contentContainerStyle={styes.scroolContainer}>
-            {
-                pills.map((pill: Pill)=>{
-                    return (
-                        <PillComponent
-                            key={pill.id}
-                            pill={pill}
-                        />
-                    )
-                })
-            }
+            { pillsComponents }
         </ScrollView>
     )
 }
