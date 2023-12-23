@@ -43,9 +43,14 @@ const getDescriptionText = (pillRoutine: PillRoutine)=>{
         return ""
     }
 }
- 
 
-export default function PillRoutineComponent({ pillRoutine }: {pillRoutine: PillRoutine}){
+type Props = {
+    pillRoutine: PillRoutine,
+    onPillRoutineEdit: (pillRoutineKey: string)=>void;
+    onPillRoutineDelete: (pillRoutineKey: string)=>void;
+}
+
+export default function PillRoutineComponent({ pillRoutine, onPillRoutineEdit, onPillRoutineDelete }: Props){
 
     const [isSelected, setIsSelected] = useState(false);
     const dropDownAnimHeight = useRef(new Animated.Value(64)).current;
@@ -106,9 +111,10 @@ export default function PillRoutineComponent({ pillRoutine }: {pillRoutine: Pill
                             <ClickableButton
                                 width={140}
                                 height={32}
-                                onPress={()=>{navigation.navigate("EditPillRoutine", {
-                                    pillRoutineKey: pillRoutine.pillRoutineKey
-                                })}}
+                                onPress={()=>onPillRoutineEdit(pillRoutine.pillRoutineKey)}
+                                // onPress={()=>{navigation.navigate("EditPillRoutine", {
+                                //     pillRoutineKey: pillRoutine.pillRoutineKey
+                                // })}}
                                 text="Editar"
                                 buttonStyle={styles.editBttnContainer}
                                 textStyle={[globalStyle.text, { fontSize: 16 }]}
@@ -116,7 +122,7 @@ export default function PillRoutineComponent({ pillRoutine }: {pillRoutine: Pill
                             <ClickableButton
                                 width={140}
                                 height={32}
-                                onPress={()=>{}}
+                                onPress={()=>{onPillRoutineDelete(pillRoutine.pillRoutineKey)}}
                                 text="Deletar"
                                 buttonStyle={styles.deleteBttnContainer}
                                 textStyle={[globalStyle.text, { fontSize: 16 }]}

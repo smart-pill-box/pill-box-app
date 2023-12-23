@@ -67,8 +67,11 @@ export default function RoutineTypeScreen({route, navigation}: Props){
         if (selectedType == "weekdays"){
             navigation.navigate("WeekdaysPicker", route.params);
         }
-        else {
-            navigation.navigate("TimesPerDay", route.params)
+        else if (selectedType == "dayPeriod") {
+            navigation.navigate("DayPeriod", route.params);
+        }
+        else if (selectedType == "everyday"){
+            navigation.navigate("TimesPerDay", route.params);
         }
 
     }

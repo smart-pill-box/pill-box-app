@@ -11,9 +11,6 @@ type SelectableDateProps = {
 }
 
 const SelectableDate = React.memo(({date, isSelected, onClick, index, isToday}: SelectableDateProps)=>{
-    console.log("redered")
-    
-
     const styles = useMemo(()=>StyleSheet.create({
         weekdayText: {
             color: "#909090",

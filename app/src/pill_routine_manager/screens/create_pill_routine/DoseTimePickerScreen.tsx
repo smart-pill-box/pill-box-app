@@ -168,7 +168,7 @@ const createPillRoutinePayload = (pillRoutineForm: PillRoutineForm, pickedTimesP
     }
     else if (routineType == "dayPeriod"){
         routineData = {
-            periodInDays: 5,
+            periodInDays: pillRoutineForm.dayPeriodAnswers?.periodInDays,
             pillsTimes: pickedTimesPerDoseToArray(pickedTimesPerDose)
         };
     }

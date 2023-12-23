@@ -4,6 +4,7 @@ import { NameDefinitionAnswers } from "./screens/create_pill_routine/NameDefinit
 import { WeekdaysPickerAnswers } from "./screens/create_pill_routine/WeekdaysPickerScreen";
 import { TimesPerDayAnswers } from "./screens/create_pill_routine/TimesPerDayScreen";
 import { DoseTimePickerAnswers } from "./screens/create_pill_routine/DoseTimePickerScreen";
+import { DayPeriodAnswers } from "./screens/create_pill_routine/DayPeriodScreen";
 
 export type PillRoutineType = "weekdays" | "everyday" | "dayPeriod";
 
@@ -11,6 +12,7 @@ export interface PillRoutineForm {
     nameDefinitionAnswers?: NameDefinitionAnswers;
     routineTypeAnswers?: RoutineTypeAnswers;
     weekdaysPickerAnswers?: WeekdaysPickerAnswers;
+    dayPeriodAnswers?: DayPeriodAnswers;
     timesPerDayAnswers?: TimesPerDayAnswers;
 }
 

@@ -83,7 +83,7 @@ function Home({ route, navigation }: HomeProps): JSX.Element {
 function NavigatorContainer(){
   const { keycloak } = useKeycloak();
   const [profileKey, setProfileKey] = useState<string>("");
-  
+
   return (
     <NavigationContainer linking={linking}>
     <ProfileKeyContext.Provider value={{
@@ -122,6 +122,11 @@ function App(): JSX.Element {
       authClient={keycloakClient}
       initOptions={{
         redirectUri: "mymedsafe.pillbox://add_profile"
+      }}
+      onEvent={(eventType, err)=>{
+        if(eventType == "onTokenExpired"){
+          keycloak?.updateToken();
+        }
       }}
     >
       <NavigatorContainer/>

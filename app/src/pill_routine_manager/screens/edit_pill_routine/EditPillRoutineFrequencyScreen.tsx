@@ -8,11 +8,12 @@ import { globalStyle } from "../../../style";
 import SelectableWeekdays from "../../components/SelectableWeekdays";
 import ClickableButton from "../../../components/ClickabeButton";
 import { PillRoutine } from "../../../types/pill_routine";
+import BorderTextInput from "../../../profile_picker/components/BorderTextInput";
 
 type Weekday = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "EditPillRoutineFrequency">
 
-export default function EditPillRoutineFrequencyScreen({ route, navigation }: Props){
+function EditWeekdaysRoutineFrequency({ route, navigation }: Props){
     const updatePillRoutineDates = (pillRoutine: PillRoutine)=>{
         const hours = pillRoutine.pillRoutineData[Object.keys(pillRoutine.pillRoutineData)[0]]
         let newData: any = {};
@@ -42,15 +43,15 @@ export default function EditPillRoutineFrequencyScreen({ route, navigation }: Pr
     return (
         <View style={{ flex: 1}}>
             <FormsHeader pillName={pillRoutine?.name} onBackPressed={navigation.goBack}/>
-            <View style={styles.mainContainer}>
-                <Text style={[globalStyle.text, styles.text]}> Selecione os dias da semana em que você tomará esse remédio </Text>
+            <View style={weekdaysStyle.mainContainer}>
+                <Text style={[globalStyle.text, weekdaysStyle.text]}> Selecione os dias da semana em que você tomará esse remédio </Text>
                 <SelectableWeekdays
                     selectedDays={selectedDays}
                     setSelectedDays={setSelectedDays}
                 />
 
             </View>
-            <View style={styles.nextButtonContainer}>
+            <View style={weekdaysStyle.nextButtonContainer}>
                 <ClickableButton
                     width={200}
                     height={52}
@@ -63,7 +64,62 @@ export default function EditPillRoutineFrequencyScreen({ route, navigation }: Pr
     )
 }
 
-const styles = StyleSheet.create({
+function EditDayPeriodRoutineFrequency({ route, navigation }: Props){
+    const { pillRoutine, setPillRoutine } = useContext(PillRoutineEditContext);
+    const [ periodInDays, setPeriodInDays ] = useState<number>(pillRoutine?.pillRoutineData.periodInDays);
+
+    const validateAndContinue = ()=>{
+        const newPillRoutine = {...pillRoutine};
+        newPillRoutine.pillRoutineData.periodInDays = periodInDays;
+
+        setPillRoutine(newPillRoutine as PillRoutine);
+        navigation.goBack();
+    }
+
+    return (
+        <View style={{height: "100%"}}>
+            <FormsHeader onBackPressed={()=>{navigation.goBack()}} pillName={pillRoutine?.name}/>
+            <View style={dayPeriodStyle.mainContainer}>
+                <Text style={[globalStyle.text, dayPeriodStyle.questionText]}>A cada quantos dias você precisa tomar esse remédio? </Text>
+                <View style={dayPeriodStyle.inputContainer}>
+                    <BorderTextInput
+                        width={80}
+                        height={80}
+                        onChangeText={periodStr=>setPeriodInDays(+periodStr)}
+                        currentValue={String(periodInDays)}
+                        keyboardType="numeric"
+                        maxLength={2}
+                        style={{ fontSize: 32 }}
+                    />
+                    <Text style={[globalStyle.text, { fontSize: 24 }]}> dias </Text>
+                </View>
+
+            </View>
+            <View style={dayPeriodStyle.nextButtonContainer}>
+                <ClickableButton
+                    width={200}
+                    height={52}
+                    onPress={validateAndContinue}
+                    text="Alterar"
+                    buttonStyle={{width: "100%"}}
+                />
+            </View>
+        </View>
+    )
+}
+
+export default function EditPillRoutineFrequencyScreen({ route, navigation }: Props){
+    const { pillRoutine, setPillRoutine } = useContext(PillRoutineEditContext);
+
+    if(pillRoutine?.pillRoutineType == "weekdays"){
+        return EditWeekdaysRoutineFrequency({ route, navigation });
+    }
+    else if(pillRoutine?.pillRoutineType == "dayPeriod"){
+        return EditDayPeriodRoutineFrequency({ route, navigation });
+    }
+};
+
+const weekdaysStyle = StyleSheet.create({
     mainContainer: {
         flexDirection: "column",
         justifyContent: "space-between",
@@ -82,6 +138,31 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         width: "100%",
         gap: 24
+    },
+    nextButtonContainer: {
+        position: "absolute",
+        width: "100%",
+        paddingHorizontal: 16,
+        bottom: 16
+    }
+});
+
+const dayPeriodStyle = StyleSheet.create({
+    mainContainer: {
+        flexDirection: "column",
+        justifyContent: "space-between",
+        gap: 40,
+        paddingHorizontal: 28
+    },
+    questionText: {
+        color: "#575757",
+        width: "100%",
+        fontSize: 24
+    },
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12
     },
     nextButtonContainer: {
         position: "absolute",

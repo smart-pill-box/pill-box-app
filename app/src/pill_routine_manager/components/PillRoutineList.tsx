@@ -4,10 +4,12 @@ import { globalStyle } from "../../style"
 import PillRoutineComponent from "./PillRoutineComponent"
 
 type Props = {
-    pillRoutines: PillRoutine[]
+    pillRoutines: PillRoutine[],
+    onPillRoutineEdit: (pillRoutineKey: string)=>void;
+    onPillRoutineDelete: (pillRoutineKey: string)=>void
 }
 
-export default function PillRoutineList({ pillRoutines }: Props){
+export default function PillRoutineList({ pillRoutines, onPillRoutineEdit, onPillRoutineDelete }: Props){
     const styles = StyleSheet.create({
         scroolContainerStyle: {
             gap: 8
@@ -48,7 +50,7 @@ export default function PillRoutineList({ pillRoutines }: Props){
             flex: 4,
             paddingLeft: 16
         }
-    })
+    });
 
     return (
         <ScrollView contentContainerStyle={styles.scroolContainerStyle} style={styles.scroolStyle}>
@@ -56,8 +58,16 @@ export default function PillRoutineList({ pillRoutines }: Props){
                 if (["updated", "canceled"].includes(pillRoutine.status)){
                     return
                 }
+                if(pillRoutine.expirationDatetime && ((new Date(pillRoutine.expirationDatetime)).getTime() < (new Date()).getTime())){
+                    return
+                }
                 return (
-                    <PillRoutineComponent pillRoutine={pillRoutine} key={pillRoutine.pillRoutineKey}/>
+                    <PillRoutineComponent 
+                        pillRoutine={pillRoutine} 
+                        key={pillRoutine.pillRoutineKey} 
+                        onPillRoutineDelete={onPillRoutineDelete} 
+                        onPillRoutineEdit={onPillRoutineEdit}
+                    />
                 )
             })}
         </ScrollView>

@@ -225,27 +225,32 @@ const weekdayTradutor: {[key: string]: string} = {
 }
 
 const getFrequencyDetailsText = (pillRoutine: PillRoutine)=>{
-    const weekdays = Object.keys(pillRoutine.pillRoutineData);
-
-    if (weekdays.length == 7){
-        return "Tomar todos os dias"
-    }
-    else {
-        let text = "Tomar toda ";
-        if(["sunday", "saturday"].includes(weekdays[0])){
-            text = "Tomar todo ";
-        }
-
-        weekdays.forEach((weekday: string)=>{
-            text += `${weekdayTradutor[weekday]}, `
-        })
-
-        if (weekdays.length > 1){
-            return text.slice(0, -7) + " e " + text.slice(-5, -2);
+    if(pillRoutine.pillRoutineType == "weekdays"){
+        const weekdays = Object.keys(pillRoutine.pillRoutineData);
+    
+        if (weekdays.length == 7){
+            return "Tomar todos os dias"
         }
         else {
-            return text.slice(0, -2);
+            let text = "Tomar toda ";
+            if(["sunday", "saturday"].includes(weekdays[0])){
+                text = "Tomar todo ";
+            }
+    
+            weekdays.forEach((weekday: string)=>{
+                text += `${weekdayTradutor[weekday]}, `
+            })
+    
+            if (weekdays.length > 1){
+                return text.slice(0, -7) + " e " + text.slice(-5, -2);
+            }
+            else {
+                return text.slice(0, -2);
+            }
         }
+    }
+    else if(pillRoutine.pillRoutineType == "dayPeriod"){
+        return `Tomar a cada ${pillRoutine.pillRoutineData.periodInDays} dias`
     }
 };
 

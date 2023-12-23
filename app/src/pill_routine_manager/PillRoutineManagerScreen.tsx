@@ -45,22 +45,23 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
 
     const {profileKey, setProfileKey} = useContext(ProfileKeyContext);
 
-    useFocusEffect(useCallback(()=>{
-        const getPillRoutines = async () => {
-            try{
-                const resp = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
-                    headers: {
-                        Authorization: keycloak?.token
-                    }
-                })
-                
-                console.log(resp.data)
-                setPillRoutines(resp.data.data);
-            } 
-            catch(err){
-                console.error(err);
-            }
+    const getPillRoutines = async () => {
+        try{
+            const resp = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
+                headers: {
+                    Authorization: keycloak?.token
+                }
+            })
+            
+            console.log(resp.data)
+            setPillRoutines(resp.data.data);
+        } 
+        catch(err){
+            console.error(err);
         }
+    }
+
+    useFocusEffect(useCallback(()=>{
         const getProfile = async () => {
             try {
                 const { data } = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
@@ -104,7 +105,14 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
         )
     }
 
-    if(pillRoutines.length == 0){
+    let numberOfActiveRoutines = 0;
+    pillRoutines.forEach(pillRoutine=>{
+        if(pillRoutine.status == "active"){
+            numberOfActiveRoutines += 1;
+        }
+    })
+
+    if(numberOfActiveRoutines == 0){
         return (
             <View>
                 <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
@@ -126,6 +134,23 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
                 <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
                 <PillRoutineList
                     pillRoutines={pillRoutines}
+                    onPillRoutineEdit={pillRoutineKey=>{
+                        navigation.navigate("EditPillRoutine", {
+                            pillRoutineKey: pillRoutineKey
+                        })
+                        return
+                    }}
+                    onPillRoutineDelete={async pillRoutineKey=>{
+                        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}/status`,
+                        {
+                            status: "canceled"
+                        }, {
+                            headers: {
+                                Authorization: keycloak?.token
+                            }
+                        });
+                        getPillRoutines();
+                    }}
                 />
                 <View style={styles.addButtnContainer}>
                     <AddButton
