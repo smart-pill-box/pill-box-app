@@ -1,11 +1,12 @@
 import { RNKeycloak } from '@react-keycloak/native';
+import { KC_CLIEND_ID, KC_HOST, KC_REALM } from './src/constants';
 
 // Setup Keycloak instance as needed
 // Pass initialization options as required
 const keycloak = new RNKeycloak({
-  url: 'http://192.168.0.23:8887/',
-  realm: 'test_realm',
-  clientId: 'test_client',
+  url: KC_HOST,
+  realm: KC_REALM,
+  clientId: KC_CLIEND_ID,
 });
 
 export default keycloak;

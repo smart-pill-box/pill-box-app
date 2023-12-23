@@ -11,10 +11,13 @@ import axios from 'axios';
 import { useKeycloak } from '@react-keycloak/native';
 import { PillRoutine } from '../types/pill_routine';
 import PillList from './components/PillList';
+import keycloak from '../../keycloak';
+import { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { MEDICINE_API_HOST } from '../constants';
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillCalendar">
 
-type PillStatus = "pending" | "manualyConfirmed" | "pillBoxConfirmed" | "canceled"
+type PillStatus = "pending" | "manualyConfirmed" | "pillBoxConfirmed" | "canceled" | "reeschaduled"
 
 export type PillStatusEvent = {
     status: PillStatus,
@@ -66,6 +69,7 @@ function NoPillContainer(){
             top: 40
         }
     })
+
     return (
         <View style={styles.mainContainer}>
             <View style={styles.textContainer}>
@@ -102,7 +106,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
         useCallback(()=>{
             const getPillRoutines = async () => {
                 try{
-                    const resp = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
+                    const resp = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
                         headers: {
                             Authorization: keycloak?.token
                         }
@@ -117,7 +121,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             }
             const getProfile = async () => {
                 try {
-                    const { data } = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
+                    const { data } = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
                         headers: {
                             Authorization: keycloak?.token
                         }
@@ -147,7 +151,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     }
 
     const getPillsOnDate = async (pillRoutines: PillRoutine[], today: Date)=>{
-        const response = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pills?fromDate=${today.toISOString().split("T")[0]}&toDate=${today.toISOString().split("T")[0]}`, {
+        const response = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pills?fromDate=${today.toISOString().split("T")[0]}&toDate=${today.toISOString().split("T")[0]}`, {
             headers: {
                 Authorization: keycloak?.token
             }
@@ -179,7 +183,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     }
 
     const onPillManualyConsumed = async (pill: Pill)=>{
-        await axios.put(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
+        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
             status: "manualyConfirmed",
         }, {
             headers: {
@@ -190,8 +194,20 @@ export default function PillCalendarScreen({ route, navigation }: Props){
         getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
     }
 
+    const onPillReeschadule = async (pill: Pill, newDatetime: Date)=>{
+        await axios.post(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/reeschadule`, {
+            newPillDatetime: newDatetime.toISOString(),
+        }, {
+            headers: {
+                Authorization: keycloak?.token
+            }
+        });
+
+        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
+    }
+
     const onPillDeleted = async (pill: Pill)=>{
-        await axios.put(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
+        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
             status: "canceled",
         }, {
             headers: {
@@ -220,7 +236,26 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             pills={todayPills}
             onPillDelete={onPillDeleted}
             onPillManualConsumed={onPillManualyConsumed}
-            onPillReeschadule={(pill)=>{}}
+            onPillReeschadule={(pill)=>{
+                DateTimePickerAndroid.open({
+                    value: pill.pillDatetime,
+                    onChange: (event, date)=>{
+                        if((event.type == "set")){
+                            DateTimePickerAndroid.open({
+                                value: date!,
+                                onChange: (event, selectedDatetime)=>{
+                                    if((event.type == "set") && (pill.pillDatetime.toISOString() != selectedDatetime?.toISOString())){
+                                        onPillReeschadule(pill, selectedDatetime!)
+                                    }
+                                },
+                                mode: "time",
+                                is24Hour: true
+                            })
+                        }
+                    },
+                    mode: "date"
+                })
+            }}
             componentIfEmpty={<NoPillContainer/>}
         />
     </View>

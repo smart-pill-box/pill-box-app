@@ -14,6 +14,7 @@ import axios from "axios";
 import { ProfileKeyContext } from "../../../profile_picker/ProfileKeyContext";
 import { useKeycloak } from "@react-keycloak/native";
 import DoseTime from "../../components/DoseTime";
+import { MEDICINE_API_HOST } from "../../../constants";
 
 type WeekdaysAnswers = {
     monday?: string[];
@@ -57,7 +58,7 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
         const payload = createPillRoutinePayload(pillRoutineForm, pickedTimesPerDose);
 
         try {
-            const resp = await axios.post(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine`, payload, {
+            const resp = await axios.post(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine`, payload, {
                 headers: {
                     Authorization: keycloak?.token
                 }
@@ -95,7 +96,11 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
                         <DoseTime
                             doseNumber={index}
                             selectedTime={pickedTimesPerDose[index]}
-                            onTimePicked={(event: DateTimePickerEvent, selectedDate?: Date)=>{setDateByIndex(index, selectedDate)}}
+                            onTimePicked={(event: DateTimePickerEvent, selectedDate?: Date)=>{
+                                if(event.type == "set"){
+                                    setDateByIndex(index, selectedDate)}
+                                }
+                            }
                             key={index}
                         />
                     )) }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1066760681328",
+    "project_id": "pillbox-e5180",
+    "storage_bucket": "pillbox-e5180.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066760681328:android:b7c8a988bef134d89f41b5",
+        "android_client_info": {
+          "package_name": "com.pillboxapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBw_fYkkb7aGpAU5HenZ5ecDIQYfBJBOIg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

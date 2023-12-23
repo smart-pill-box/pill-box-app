@@ -13,6 +13,7 @@ import { globalStyle } from "../../../style";
 import ClickablePointer from "../../../components/ClickablePointer";
 import ClickableButton from "../../../components/ClickabeButton";
 import { PillRoutineEditContext } from "../../PillRoutineEditContext";
+import { MEDICINE_API_HOST } from "../../../constants";
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "EditPillRoutine">;
 
@@ -76,7 +77,7 @@ export default function EditPillRoutineScreen({ route, navigation }: Props){
         delete payload.status;
         delete payload.startDatetime;
 
-        await axios.put(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`, payload, {
+        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`, payload, {
             headers: {
                 Authorization: keycloak?.token
             }
@@ -94,7 +95,7 @@ export default function EditPillRoutineScreen({ route, navigation }: Props){
         useCallback(()=>{
             const getPillRoutine = async () => {
                 try{
-                    const resp = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`, {
+                    const resp = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pillRoutineKey}`, {
                         headers: {
                             Authorization: keycloak?.token
                         }

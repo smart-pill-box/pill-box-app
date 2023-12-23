@@ -23,7 +23,7 @@ export default function PillList({ pills, onPillReeschadule, onPillDelete, onPil
     let haveSomePill = false;
     
     const pillsComponents = pills.map((pill: Pill, index)=>{
-        if(pill.status == "canceled"){
+        if((pill.status == "canceled") || (pill.status == "reeschaduled")){
             return
         }
         haveSomePill = true;

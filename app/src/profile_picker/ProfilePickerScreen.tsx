@@ -18,6 +18,7 @@ import { globalStyle } from "../style";
 import SelectableButton from "../pill_routine_manager/components/SelectableButton";
 import ClickableButton from "../components/ClickabeButton";
 import { ProfileKeyContext } from "./ProfileKeyContext";
+import { MEDICINE_API_HOST } from "../constants";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProfilePicker">
 type MaskedPillsImageProps = {
@@ -89,7 +90,7 @@ function FirstAccessComponent({ onAccountCreated }: {onAccountCreated: (newAccou
     const [avatarNumber, setAvatarNumber] = useState(0)
     const [profileName, setProfileName] = useState("")
     const onButtonPressed = ()=>{
-        axios.post("http://192.168.0.23:8080/account", {
+        axios.post(`${MEDICINE_API_HOST}/account`, {
             mainProfileName: profileName,
             mainProfileAvatarNumber: avatarNumber
         }, {
@@ -182,7 +183,7 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
     };
 
     const retrieveProfiles = () => {
-        axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}`, {
+        axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}`, {
             headers: {
                 Authorization: keycloak?.token
             }

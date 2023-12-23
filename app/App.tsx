@@ -23,6 +23,13 @@ import { ProfileKeyContext } from './src/profile_picker/ProfileKeyContext';
 import PillIcon from './src/components/bottomTabIcons/PillIcon';
 import CalendarIcon from './src/components/bottomTabIcons/CalendarIcon';
 import DeviceIcon from './src/components/bottomTabIcons/DeviceIcon';
+import {PermissionsAndroid} from 'react-native';
+import { firebase } from '@react-native-firebase/messaging';
+
+PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+firebase.messaging().getToken().then(token=>{
+  console.log("Firebase token is ", token);
+})
 
 
 export type RootTabParamList = {

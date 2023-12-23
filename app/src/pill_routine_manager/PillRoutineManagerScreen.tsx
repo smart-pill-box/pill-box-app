@@ -13,6 +13,7 @@ import { ProfileKeyContext } from "../profile_picker/ProfileKeyContext";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/native";
 import AddButton from "../components/AddButton";
+import { MEDICINE_API_HOST } from "../constants";
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "PillRoutineManager">;
 
@@ -47,7 +48,7 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
     useFocusEffect(useCallback(()=>{
         const getPillRoutines = async () => {
             try{
-                const resp = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
+                const resp = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
                     headers: {
                         Authorization: keycloak?.token
                     }
@@ -62,7 +63,7 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
         }
         const getProfile = async () => {
             try {
-                const { data } = await axios.get(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
+                const { data } = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
                     headers: {
                         Authorization: keycloak?.token
                     }

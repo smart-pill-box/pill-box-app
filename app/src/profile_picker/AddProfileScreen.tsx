@@ -11,6 +11,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import AvatarNavigator from "./components/AvatarNavigator";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/native";
+import { MEDICINE_API_HOST } from "../constants";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddProfile">
@@ -68,7 +69,7 @@ export default function AddProfileScreen({ route, navigation }: Props){
     const onCreatePressed = async ()=>{
         setIsButtonEnabled(false);
         try{
-            await axios.post(`http://192.168.0.23:8080/account/${keycloak?.tokenParsed?.sub}/profile`, {
+            await axios.post(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile`, {
                 name: newProfileName,
                 avatarNumber: avatarNumber
             }, {
