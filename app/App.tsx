@@ -25,6 +25,7 @@ import CalendarIcon from './src/components/bottomTabIcons/CalendarIcon';
 import DeviceIcon from './src/components/bottomTabIcons/DeviceIcon';
 import {PermissionsAndroid} from 'react-native';
 import { firebase } from '@react-native-firebase/messaging';
+import PillNotificationManager from './src/utils/pill_notification_manager';
 
 PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 firebase.messaging().getToken().then(token=>{

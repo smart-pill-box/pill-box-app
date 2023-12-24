@@ -12,6 +12,7 @@ import AvatarNavigator from "./components/AvatarNavigator";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/native";
 import { MEDICINE_API_HOST } from "../constants";
+import PillNotificationManager from "../utils/pill_notification_manager";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddProfile">
@@ -77,6 +78,9 @@ export default function AddProfileScreen({ route, navigation }: Props){
                     Authorization: keycloak?.token
                 }
             })
+            PillNotificationManager.deleteAndCreatePillsNotifications(
+                keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+            )
 
             navigation.navigate("ProfilePicker");
         }catch(err){

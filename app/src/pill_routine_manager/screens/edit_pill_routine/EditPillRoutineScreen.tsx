@@ -14,6 +14,7 @@ import ClickablePointer from "../../../components/ClickablePointer";
 import ClickableButton from "../../../components/ClickabeButton";
 import { PillRoutineEditContext } from "../../PillRoutineEditContext";
 import { MEDICINE_API_HOST } from "../../../constants";
+import PillNotificationManager from "../../../utils/pill_notification_manager";
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "EditPillRoutine">;
 
@@ -82,6 +83,9 @@ export default function EditPillRoutineScreen({ route, navigation }: Props){
                 Authorization: keycloak?.token
             }
         });
+        PillNotificationManager.deleteAndCreatePillsNotifications(
+            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+        )
 
         navigation.goBack();
     }

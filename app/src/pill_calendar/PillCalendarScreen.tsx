@@ -14,6 +14,7 @@ import PillList from './components/PillList';
 import keycloak from '../../keycloak';
 import { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { MEDICINE_API_HOST } from '../constants';
+import PillNotificationManager from '../utils/pill_notification_manager';
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillCalendar">
 
@@ -112,7 +113,6 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                         }
                     })
                     
-                    console.log(resp.data)
                     setPillRoutines(resp.data.data);
                 } 
                 catch(err){
@@ -126,8 +126,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                             Authorization: keycloak?.token
                         }
                     })
-                    console.log(data);
-                    
+
                     setProfileData({
                         name: data.name,
                         avatarNumber: data.avatarNumber
@@ -156,7 +155,6 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                 Authorization: keycloak?.token
             }
         });
-        console.log(response.data)
         
         let pillsOnDate: Pill[] = [];
         response.data.data.forEach((pill: any)=>{
@@ -176,8 +174,6 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                 })
             }
         })
-
-        console.log("Today pills are ", pillsOnDate)
     
         return pillsOnDate;
     }
@@ -190,6 +186,9 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                 Authorization: keycloak?.token
             }
         });
+        PillNotificationManager.deleteAndCreatePillsNotifications(
+            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+        )
 
         getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
     }
@@ -202,6 +201,9 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                 Authorization: keycloak?.token
             }
         });
+        PillNotificationManager.deleteAndCreatePillsNotifications(
+            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+        )
 
         getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
     }
@@ -214,6 +216,9 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                 Authorization: keycloak?.token
             }
         });
+        PillNotificationManager.deleteAndCreatePillsNotifications(
+            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+        )
 
         getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
     }

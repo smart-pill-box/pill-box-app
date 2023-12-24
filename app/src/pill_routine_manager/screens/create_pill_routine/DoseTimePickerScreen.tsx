@@ -15,6 +15,7 @@ import { ProfileKeyContext } from "../../../profile_picker/ProfileKeyContext";
 import { useKeycloak } from "@react-keycloak/native";
 import DoseTime from "../../components/DoseTime";
 import { MEDICINE_API_HOST } from "../../../constants";
+import PillNotificationManager from "../../../utils/pill_notification_manager";
 
 type WeekdaysAnswers = {
     monday?: string[];
@@ -63,6 +64,9 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
                     Authorization: keycloak?.token
                 }
             })
+            PillNotificationManager.deleteAndCreatePillsNotifications(
+                keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+            )
             
             navigation.navigate("PillRoutineManager")
         } catch(err){

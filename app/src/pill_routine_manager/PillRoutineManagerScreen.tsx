@@ -14,6 +14,7 @@ import axios from "axios";
 import { useKeycloak } from "@react-keycloak/native";
 import AddButton from "../components/AddButton";
 import { MEDICINE_API_HOST } from "../constants";
+import PillNotificationManager from "../utils/pill_notification_manager";
 
 type Props = NativeStackScreenProps<PillRoutineStackParamList, "PillRoutineManager">;
 
@@ -149,6 +150,10 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
                                 Authorization: keycloak?.token
                             }
                         });
+
+                        PillNotificationManager.deleteAndCreatePillsNotifications(
+                            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+                        )
                         getPillRoutines();
                     }}
                 />

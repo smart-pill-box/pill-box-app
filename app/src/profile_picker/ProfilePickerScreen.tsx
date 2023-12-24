@@ -19,6 +19,7 @@ import SelectableButton from "../pill_routine_manager/components/SelectableButto
 import ClickableButton from "../components/ClickabeButton";
 import { ProfileKeyContext } from "./ProfileKeyContext";
 import { MEDICINE_API_HOST } from "../constants";
+import PillNotificationManager from "../utils/pill_notification_manager";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProfilePicker">
 type MaskedPillsImageProps = {
@@ -164,14 +165,15 @@ export default function ProfilePickerScreen({ route, navigation }: Props){
         }
     });
 
-
+    
+    
     const onProfileChoice = (profile: Profile)=>{
         setProfileKey(profile.profileKey);
         navigation.navigate("Home", {
             screen: "PillCalendar"
         });
     }
-
+    
     const {profileKey, setProfileKey} = useContext(ProfileKeyContext);
     
     const { keycloak } = useKeycloak();

@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { Button, Text, TouchableOpacity, View } from "react-native"
 import { RootStackParamList } from "../../../App"
 import { useKeycloak } from "@react-keycloak/native"
+import PillNotificationManager from "../../utils/pill_notification_manager"
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">
 
@@ -13,6 +14,8 @@ export default function LoginScreen({route, navigation}: Props){
                 onPress={()=>{keycloak?.login({
                     redirectUri: "mymedsafe.pillbox://add_profile"
                 }).then(()=>{
+                    PillNotificationManager.createNextPillsNotificationsIfDontExist(keycloak?.tokenParsed?.sub!, keycloak?.token!, 3);
+
                     if(!keycloak.authenticated){
                         keycloak?.clearToken();
                     }
