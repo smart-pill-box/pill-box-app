@@ -23,7 +23,7 @@ import { ProfileKeyContext } from './src/profile_picker/ProfileKeyContext';
 import PillIcon from './src/components/bottomTabIcons/PillIcon';
 import CalendarIcon from './src/components/bottomTabIcons/CalendarIcon';
 import DeviceIcon from './src/components/bottomTabIcons/DeviceIcon';
-import {PermissionsAndroid} from 'react-native';
+import {PermissionsAndroid, Text} from 'react-native';
 import { firebase } from '@react-native-firebase/messaging';
 import PillNotificationManager from './src/utils/pill_notification_manager';
 
@@ -117,12 +117,46 @@ function NavigatorContainer(){
 
 function App(): JSX.Element {
   const { keycloak } = useKeycloak();
+  const [loaded, setLoaded] = useState(false);
+  const [initTokens, setInitTokens] = useState<{
+    token: string,
+    refreshToken: string
+  }>();
+
+  useEffect(()=>{
+    AsyncStorage.multiGet(["token", "refreshToken"]).then((tokens)=>{
+      if((!tokens) || !tokens[0][1] || !tokens[1][1]){
+        setLoaded(true)
+        return
+      }
+      setLoaded(true);
+      setInitTokens({
+        token: tokens[0][1],
+        refreshToken: tokens[1][1]
+      })
+    })
+  }, [])
+
+  if(!loaded){
+    return (
+      <Text> Loading </Text>
+    )
+  }
 
   return (
     <ReactNativeKeycloakProvider
       authClient={keycloakClient}
       initOptions={{
-        redirectUri: "mymedsafe.pillbox://add_profile"
+        redirectUri: "mymedsafe.pillbox://add_profile",
+        token: initTokens?.token,
+        refreshToken: initTokens?.refreshToken, 
+      }}
+      onTokens={async (tokens)=>{
+        if(!tokens.token || !tokens.refreshToken){
+          return
+        }
+        await AsyncStorage.setItem("token", tokens.token!).catch(err=>console.error(err));
+        await AsyncStorage.setItem("refreshToken", tokens.refreshToken!).catch(err=>console.error(err));
       }}
       onEvent={(eventType, err)=>{
         if(eventType == "onTokenExpired"){
@@ -133,6 +167,7 @@ function App(): JSX.Element {
       <NavigatorContainer/>
     </ReactNativeKeycloakProvider>
   );
+
 }
 
 export default App;

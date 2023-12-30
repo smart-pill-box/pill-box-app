@@ -15,11 +15,17 @@ import keycloak from '../../keycloak';
 import { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { MEDICINE_API_HOST } from '../constants';
 import PillNotificationManager from '../utils/pill_notification_manager';
-import { addDays } from 'date-fns';
+import { addDays, isAfter, isBefore } from 'date-fns';
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillCalendar">
 
 type PillStatus = "pending" | "manualyConfirmed" | "pillBoxConfirmed" | "canceled" | "reeschaduled"
+
+type PillsByDate = {
+    [key: string]: Pill[] | string;
+    fromDate: string;
+    toDate: string;
+};
 
 export type PillStatusEvent = {
     status: PillStatus,
@@ -94,32 +100,18 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     const initialDate = new Date();
     const { keycloak } = useKeycloak()
     const [ selectedDate, setSelectedDate ] = useState<Date>(initialDate)
-    const [ pillRoutines, setPillRoutines ] = useState<PillRoutine[]>([])
     const { profileKey, setProfileKey } = useContext(ProfileKeyContext)
     const [ profileData, setProfileData ] = useState({
         name: "",
         avatarNumber: 1
     });
     const [todayPills, setTodayPills] = useState<Pill[]>([]);
+    const [pillsByDate, setPillsByDate] = useState<PillsByDate>();
 
     const today = new Date();
 
     useFocusEffect(
         useCallback(()=>{
-            const getPillRoutines = async () => {
-                try{
-                    const resp = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routines`, {
-                        headers: {
-                            Authorization: keycloak?.token
-                        }
-                    })
-                    
-                    setPillRoutines(resp.data.data);
-                } 
-                catch(err){
-                    console.error(err);
-                }
-            }
             const getProfile = async () => {
                 try {
                     const { data } = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}`, {
@@ -137,46 +129,77 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                     console.error(err);
                 }
             }
-            getPillRoutines();
             getProfile();
         }, [])
     );
 
     useEffect(()=>{
-        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
-    }, [selectedDate, pillRoutines])
+        getPillsByDate(selectedDate, 20).catch(err=>console.error(err));
+    }, [])
+
+    useEffect(()=>{
+        getPillsOnDate(selectedDate).then((pills)=>setTodayPills(pills)).catch(err=>console.error(err));
+    }, [pillsByDate, selectedDate])
 
     const onDateSelection = (date: Date)=>{
         setSelectedDate(date);
     }
 
-    const getPillsOnDate = async (pillRoutines: PillRoutine[], today: Date)=>{
-        const response = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pills?fromDate=${getLocalDateString(addDays(today, -1))}&toDate=${getLocalDateString(addDays(today, 1))}`, {
+    const getPillsByDate = async (meanDate: Date, range: number)=>{
+        const fromDate = getLocalDateString(addDays(meanDate, -range-1));
+        const toDate = getLocalDateString(addDays(meanDate, range+1));
+        const response = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pills?fromDate=${fromDate}&toDate=${toDate}`, {
             headers: {
                 Authorization: keycloak?.token
             }
         });
         
+        const newPillsByDate: PillsByDate = {
+            fromDate: fromDate,
+            toDate: toDate
+        };
         let pillsOnDate: Pill[] = [];
         response.data.data.forEach((pill: any)=>{
             const pillDatetime = new Date(pill.pillDatetime);
+            const localDateString = getLocalDateString(pillDatetime);
 
-            if (
-                pillDatetime.getDate() == today.getDate() 
-                && pillDatetime.getMonth() == today.getMonth()
-                && pillDatetime.getFullYear() == today.getFullYear()
-            ){
-                pillsOnDate.push({
-                    pillDatetime: pillDatetime,
-                    name: pill.name,
-                    pillRoutineKey: pill.pillRoutineKey,
-                    status: pill.status,
-                    statusEvents: pill.statusEvents
-                })
+            if(!newPillsByDate[localDateString]){
+                newPillsByDate[localDateString] = []
             }
+            (newPillsByDate[localDateString] as Pill[]).push({
+                pillDatetime: pillDatetime,
+                name: pill.name,
+                pillRoutineKey: pill.pillRoutineKey,
+                status: pill.status,
+                statusEvents: pill.statusEvents
+            });
         })
-    
-        return pillsOnDate;
+
+        setPillsByDate({
+            ...pillsByDate,
+            ...newPillsByDate
+        });
+
+        console.log(pillsByDate);
+    }
+
+    const getPillsOnDate = async (onDate: Date) => {
+        if(isAfter(onDate, new Date(pillsByDate?.toDate as string))){
+            await getPillsByDate(onDate, 10);
+        }
+        if(isBefore(onDate, new Date(pillsByDate?.fromDate as string))){
+            await getPillsByDate(onDate, 10);
+        }
+
+        if(!pillsByDate){
+            return [];
+        }
+
+        if(!pillsByDate[getLocalDateString(onDate)]){
+            return [];
+        } 
+
+        return pillsByDate[getLocalDateString(onDate)] as Pill[];
     }
 
     const onPillManualyConsumed = async (pill: Pill)=>{
@@ -191,7 +214,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
         )
 
-        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
+        getPillsByDate(selectedDate, 2);
     }
 
     const onPillReeschadule = async (pill: Pill, newDatetime: Date)=>{
@@ -206,7 +229,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
         )
 
-        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
+        getPillsByDate(selectedDate, 2);
     }
 
     const onPillDeleted = async (pill: Pill)=>{
@@ -221,7 +244,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
         )
 
-        getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
+        getPillsByDate(selectedDate, 2);
     }
     
     if (todayPills.length == 0){
