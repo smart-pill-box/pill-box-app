@@ -28,7 +28,7 @@ services:
       - KC_DB_URL=jdbc:postgresql://db:5432/keycloak
       - KC_DB_USERNAME=my_user
       - KC_DB_PASSWORD=my_pwd
-      - KC_HOSTNAME=192.168.0.2
+      - KC_HOSTNAME=192.168.3.21
       - KC_HOSTNAME_PORT=8887
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin

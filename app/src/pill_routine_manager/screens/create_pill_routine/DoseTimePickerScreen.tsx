@@ -59,13 +59,14 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
         const payload = createPillRoutinePayload(pillRoutineForm, pickedTimesPerDose);
 
         try {
+            console.log(payload);
             const resp = await axios.post(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine`, payload, {
                 headers: {
                     Authorization: keycloak?.token
                 }
             })
             PillNotificationManager.deleteAndCreatePillsNotifications(
-                keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+                keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
             )
             
             navigation.navigate("PillRoutineManager")
@@ -75,8 +76,8 @@ export default function DoseTimePickerScreen({ route, navigation }: Props){
     }
 
     const { pillRoutineForm, setPillRoutineForm } = useContext(PillRoutineFormContext);
-    const {profileKey, setProfileKey} = useContext(ProfileKeyContext)
-    const { keycloak } = useKeycloak()
+    const {profileKey, setProfileKey} = useContext(ProfileKeyContext);
+    const { keycloak } = useKeycloak();
 
     const [ pickedTimesPerDose, setPickedTimesPerDose ] = useState<PickedTimesPerDose>({})
 

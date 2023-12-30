@@ -15,6 +15,7 @@ import keycloak from '../../keycloak';
 import { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { MEDICINE_API_HOST } from '../constants';
 import PillNotificationManager from '../utils/pill_notification_manager';
+import { addDays } from 'date-fns';
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillCalendar">
 
@@ -150,7 +151,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     }
 
     const getPillsOnDate = async (pillRoutines: PillRoutine[], today: Date)=>{
-        const response = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pills?fromDate=${today.toISOString().split("T")[0]}&toDate=${today.toISOString().split("T")[0]}`, {
+        const response = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pills?fromDate=${getLocalDateString(addDays(today, -1))}&toDate=${getLocalDateString(addDays(today, 1))}`, {
             headers: {
                 Authorization: keycloak?.token
             }
@@ -161,9 +162,9 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             const pillDatetime = new Date(pill.pillDatetime);
 
             if (
-                pillDatetime.getDate == today.getDate 
-                && pillDatetime.getMonth == today.getMonth
-                && pillDatetime.getFullYear == today.getFullYear
+                pillDatetime.getDate() == today.getDate() 
+                && pillDatetime.getMonth() == today.getMonth()
+                && pillDatetime.getFullYear() == today.getFullYear()
             ){
                 pillsOnDate.push({
                     pillDatetime: pillDatetime,
@@ -187,7 +188,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             }
         });
         PillNotificationManager.deleteAndCreatePillsNotifications(
-            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+            keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
         )
 
         getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
@@ -202,7 +203,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             }
         });
         PillNotificationManager.deleteAndCreatePillsNotifications(
-            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+            keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
         )
 
         getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
@@ -217,7 +218,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             }
         });
         PillNotificationManager.deleteAndCreatePillsNotifications(
-            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+            keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
         )
 
         getPillsOnDate(pillRoutines, selectedDate).then(pills=>setTodayPills(pills)).catch(err=>console.error(err));
@@ -265,4 +266,12 @@ export default function PillCalendarScreen({ route, navigation }: Props){
         />
     </View>
     )
+}
+
+const getLocalDateString = (date: Date)=>{
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 }

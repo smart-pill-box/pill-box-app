@@ -152,7 +152,7 @@ export default function PillRoutineManagerScreen({ route, navigation }: Props){
                         });
 
                         PillNotificationManager.deleteAndCreatePillsNotifications(
-                            keycloak?.tokenParsed?.sub!, keycloak?.token!, 30
+                            keycloak?.tokenParsed?.sub!, keycloak?.token!, 5
                         )
                         getPillRoutines();
                     }}

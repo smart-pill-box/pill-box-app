@@ -14,7 +14,7 @@ export default function LoginScreen({route, navigation}: Props){
                 onPress={()=>{keycloak?.login({
                     redirectUri: "mymedsafe.pillbox://add_profile"
                 }).then(()=>{
-                    PillNotificationManager.createNextPillsNotificationsIfDontExist(keycloak?.tokenParsed?.sub!, keycloak?.token!, 3);
+                    PillNotificationManager.createNextPillsNotificationsIfDontExist(keycloak?.tokenParsed?.sub!, keycloak?.token!, 5);
 
                     if(!keycloak.authenticated){
                         keycloak?.clearToken();
