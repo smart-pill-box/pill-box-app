@@ -21,6 +21,8 @@ export default function PillList({ pills, onPillReeschadule, onPillDelete, onPil
     })
 
     let haveSomePill = false;
+
+    pills.sort((a, b)=> (new Date(a.pillDatetime)).getTime() - (new Date(b.pillDatetime)).getTime());
     
     const pillsComponents = pills.map((pill: Pill, index)=>{
         if((pill.status == "canceled") || (pill.status == "reeschaduled")){
