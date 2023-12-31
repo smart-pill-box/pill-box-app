@@ -77,6 +77,8 @@ export default class PillNotificationManager {
                     return
                 }
 
+                console.log("Criando notificação ", pillDatetime);
+
                 PillNotificationManager.createPillNotification(
                     accountKey, 
                     profileKey, 

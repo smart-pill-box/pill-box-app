@@ -7,7 +7,7 @@ import NameDefinitionScreen from "./screens/create_pill_routine/NameDefinitionSc
 import RoutineTypeScreen from "./screens/create_pill_routine/RoutineTypeScreen";
 import TimesPerDayScreen from "./screens/create_pill_routine/TimesPerDayScreen";
 import WeekdaysPickerScreen from "./screens/create_pill_routine/WeekdaysPickerScreen";
-import { useContext, useState } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { PillRoutineFormContext } from "./PillRoutineFormContext";
 import { Profile } from "../profile_picker/ProfilePickerScreen";
 import { RootTabParamList } from "../../App";
@@ -18,6 +18,7 @@ import { PillRoutineEditContext } from "./PillRoutineEditContext";
 import EditPillRoutineFrequencyScreen from "./screens/edit_pill_routine/EditPillRoutineFrequencyScreen";
 import EditPillRoutineDosesScreen from "./screens/edit_pill_routine/EditPillRoutineDosesScreen";
 import DayPeriodScreen from "./screens/create_pill_routine/DayPeriodScreen";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 export type PillRoutineStackParamList = {
     PillRoutineManager: undefined;
@@ -39,6 +40,26 @@ const Stack = createNativeStackNavigator<PillRoutineStackParamList>()
 export default function PillRoutineManagerNavigator({ route, navigation }: Props){
     const [ pillRoutineForm, setPillRoutineForm ] = useState<object>({});
     const [ editPillRoutine, setEditPillRoutine ] = useState<PillRoutine | undefined>()
+
+    useLayoutEffect(() => {
+        const tabHiddenRoutes = [
+            "EditPillRoutine",
+            "EditPillRoutineFrequency",
+            "EditPillRoutineDoses",
+            "NameDefinition",
+            "RoutineType",
+            "WeekdaysPicker",
+            "TimesPerDay",
+            "DoseTimePicker",
+            "DayPeriod"
+        ]
+        const routeName = getFocusedRouteNameFromRoute(route);
+        if (routeName && tabHiddenRoutes.includes(routeName)){
+            navigation.setOptions({tabBarStyle: { display: "none"}});
+        }else {
+            navigation.setOptions({tabBarStyle: { display: "flex"}});
+        }
+    }, [navigation, route]);
  
     return (
         <PillRoutineFormContext.Provider value={{

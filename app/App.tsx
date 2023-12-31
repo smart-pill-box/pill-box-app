@@ -97,7 +97,7 @@ function NavigatorContainer(){
       screenOptions={{
         headerShown: false,
       }}>
-        {keycloak?.authenticated ? (
+        {((keycloak?.authenticated) && (!keycloak?.isTokenExpired())) ? (
           <>
           <Stack.Screen name="ProfilePicker" component={ProfilePickerScreen}/>
           <Stack.Screen name="AddProfile" component={AddProfileScreen}/>

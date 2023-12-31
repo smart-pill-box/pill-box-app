@@ -21,25 +21,35 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
     // Check if the user pressed the "Mark as read" action
     if (type === EventType.ACTION_PRESS && pressAction.id === 'manualyConfirmed') {
         const { token, accountKey, profileKey, pillRoutineKey, pillDatetime } = notification.data;
-        await axios.put(`${MEDICINE_API_HOST}/account/${accountKey}/profile/${profileKey}/pill_routine/${pillRoutineKey}/pill/${pillDatetime}/status`, {
-            status: "manualyConfirmed",
-        }, {
-            headers: {
-                Authorization: token
-            }
-        });
+        try {
+            await axios.put(`${MEDICINE_API_HOST}/account/${accountKey}/profile/${profileKey}/pill_routine/${pillRoutineKey}/pill/${pillDatetime}/status`, {
+                status: "manualyConfirmed",
+            }, {
+                headers: {
+                    Authorization: token
+                }
+            });
+        }
+        catch (err){
+            console.error(err);
+        }
 
         await notifee.cancelNotification(notification.id);
     }
     if (type === EventType.ACTION_PRESS && pressAction.id === 'delete') {
         const { token, accountKey, profileKey, pillRoutineKey, pillDatetime } = notification.data;
-        await axios.put(`${MEDICINE_API_HOST}/account/${accountKey}/profile/${profileKey}/pill_routine/${pillRoutineKey}/pill/${pillDatetime}/status`, {
-            status: "canceled",
-        }, {
-            headers: {
-                Authorization: token
-            }
-        });
+        try {
+            await axios.put(`${MEDICINE_API_HOST}/account/${accountKey}/profile/${profileKey}/pill_routine/${pillRoutineKey}/pill/${pillDatetime}/status`, {
+                status: "canceled",
+            }, {
+                headers: {
+                    Authorization: token
+                }
+            });
+        }
+        catch (err){
+            console.error(err)
+        }
 
         await notifee.cancelNotification(notification.id);
     }

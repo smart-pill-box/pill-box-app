@@ -130,12 +130,9 @@ export default function PillCalendarScreen({ route, navigation }: Props){
                 }
             }
             getProfile();
+            getPillsByDate(selectedDate, 20).catch(err=>console.error(err));
         }, [])
     );
-
-    useEffect(()=>{
-        getPillsByDate(selectedDate, 20).catch(err=>console.error(err));
-    }, [])
 
     useEffect(()=>{
         getPillsOnDate(selectedDate).then((pills)=>setTodayPills(pills)).catch(err=>console.error(err));
