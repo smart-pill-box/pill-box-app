@@ -32,6 +32,8 @@ export default class PillNotificationManager {
         };
         const alreadyExistingNotifications = await notifee.getTriggerNotificationIds();
         if (alreadyExistingNotifications.length != 0){
+            console.log("Not creating notifications because it already exists");
+            console.log(alreadyExistingNotifications);
             return
         }
         
@@ -61,7 +63,7 @@ export default class PillNotificationManager {
         });
 
         profileKeys.forEach(async profileKey=>{
-            response = await axios.get(`${MEDICINE_API_HOST}/account/${accountKey}/profile/${profileKey}/pills?fromDate=${fromDate.toISOString().split("T")[0]}&toDate=${toDate.toISOString().split("T")[0]}`, {
+            response = await axios.get(`${MEDICINE_API_HOST}/account/${accountKey}/profile/${profileKey}/pills?fromDate=${getLocalDateString(fromDate)}&toDate=${getLocalDateString(toDate)}`, {
                 headers: {
                     Authorization: token
                 }
@@ -117,6 +119,10 @@ export default class PillNotificationManager {
                 loopSound: true,
                 sound: "default",
                 lightUpScreen: true,
+                autoCancel: false,
+                pressAction: {
+                    id: "default"
+                },
                 importance: AndroidImportance.HIGH,
                 category: AndroidCategory.ALARM,
                 channelId: PILLS_NOTIFICATIONS_CHANEL_ID,
@@ -143,7 +149,13 @@ export default class PillNotificationManager {
     }
 
     static async deleteAllNotifications(){
-        await notifee.cancelAllNotifications();
+        let notificatinIds = ["default"];
+        while (notificatinIds.length != 0){
+            await notifee.cancelTriggerNotifications();
+            await notifee.cancelAllNotifications();
+            notificatinIds = await notifee.getTriggerNotificationIds();
+            console.log('Loopinggg');
+        }
     }
 }
 
@@ -152,4 +164,12 @@ const getTimeStr = (datetime: Date)=>{
     const minutes = String(datetime.getMinutes()).padStart(2, '0');
 
     return `${hours}:${minutes}`;
+}
+
+const getLocalDateString = (date: Date)=>{
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 }

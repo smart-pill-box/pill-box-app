@@ -20,16 +20,26 @@ export default function EditPillRoutineDosesScreen({ route, navigation }: Props)
     };
 
     const updateRoutineData = (pillRoutine: PillRoutine)=>{
-        const weekdays = Object.keys(pillRoutine.pillRoutineData);
-
-        let newData: any = {}
-        weekdays.forEach((weekday)=>{
-            newData[weekday] = dosesTimes;  
-        });
-
-        pillRoutine.pillRoutineData = newData;
-
-        return {...pillRoutine}
+        if(pillRoutine.pillRoutineType == "weekdays"){
+            const weekdays = Object.keys(pillRoutine.pillRoutineData);
+    
+            let newData: any = {}
+            weekdays.forEach((weekday)=>{
+                newData[weekday] = dosesTimes;  
+            });
+    
+            pillRoutine.pillRoutineData = newData;
+    
+            return {...pillRoutine}
+        }
+        else {
+            const newData = pillRoutine.pillRoutineData;
+            newData.pillsTimes = dosesTimes;
+            pillRoutine.pillRoutineData = newData;
+            return {
+                ...pillRoutine,
+            }
+        }
     }
     const onFinish = ()=>{
         setPillRoutine(updateRoutineData(pillRoutine!));
