@@ -26,6 +26,7 @@ import DeviceIcon from './src/components/bottomTabIcons/DeviceIcon';
 import {PermissionsAndroid, Text} from 'react-native';
 import { firebase } from '@react-native-firebase/messaging';
 import PillNotificationManager from './src/utils/pill_notification_manager';
+import PillBoxManagerNavigator from './src/pill_box_manager/PillBoxManagerNavigator';
 
 PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 firebase.messaging().getToken().then(token=>{
@@ -35,7 +36,7 @@ firebase.messaging().getToken().then(token=>{
 
 export type RootTabParamList = {
   PillCalendar: undefined;
-  PillBoxManager: undefined;
+  PillBoxManagerNavigator: undefined;
   PillRoutineManagerNavigator: undefined;
 }
 
@@ -74,7 +75,7 @@ function Home({ route, navigation }: HomeProps): JSX.Element {
         <Tab.Screen name="PillCalendar" component={PillCalendarScreen} options={{
           tabBarIcon: CalendarIcon
         }}/>
-        <Tab.Screen name="PillBoxManager" component={PillBoxManagerScreen} options={{
+        <Tab.Screen name="PillBoxManagerNavigator" component={PillBoxManagerNavigator} options={{
           tabBarIcon: DeviceIcon
         }}/>
       </Tab.Navigator>
