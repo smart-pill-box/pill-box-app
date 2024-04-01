@@ -35,6 +35,7 @@ import {
     NativeEventEmitter,
     NativeModules,
     Button,
+    Modal,
   } from 'react-native';
 
 import BleManager, { BleEventType } from 'react-native-ble-manager';
@@ -59,9 +60,12 @@ import { globalStyle } from '../../style';
 import PendingPermissions from './components/PendingPermissions';
 import PendingBluetoothEnable from './components/PendingBluetoothEnabled';
 import Loading from './components/Loading';
+import ErrorModal from './components/ErrorModal';
 
 const EspProvisioningModule = NativeModules.EspProvisioningModule;
 const espProvisioningEmitter = new NativeEventEmitter(EspProvisioningModule);
+
+const MulticastModule = NativeModules.MulticastModule;
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -143,15 +147,26 @@ export default function AddDeviceScreen() {
                             password: action.payload.data.password
                         })
                         return provisionStateType.provisioningDevice;
-                    } 
+                    }
                 case provisionStateType.provisioningDevice:
                     if (event == deviceProvisionEventType.ProvisionError){
                         return provisionStateType.provisionError;
                     } else if (event == deviceProvisionEventType.WrongCredentials){
                         return provisionStateType.provisionWrongPassword;
                     } else if (event == deviceProvisionEventType.ProvisionSuccess) {
+                        console.log("Starting multicast receiver");
+                        MulticastModule.startMulticastReceiver();
                         return provisionStateType.finished;
                     }
+                case provisionStateType.provisionError:
+                    if (event == userEventType.retryWifiScan){
+                        return provisionStateType.scanningWifis
+                    }
+                case provisionStateType.provisionWrongPassword:
+                    if (event == userEventType.retryWifiScan){
+                        return provisionStateType.scanningWifis
+                    }
+                
             }
             return provisioningState;
         }
@@ -250,6 +265,7 @@ export default function AddDeviceScreen() {
                     break;
                 
                 case deviceProvisionEventType.WrongCredentials:
+                    console.log("Wrong Credentials");
                     dispatch({
                         type: ProvisionActionType.provisionEvent,
                         payload: {
@@ -259,6 +275,7 @@ export default function AddDeviceScreen() {
                     break;
 
                 case deviceProvisionEventType.ProvisionSuccess:
+                    console.log("Error provisioning")
                     dispatch({
                         type: ProvisionActionType.provisionEvent,
                         payload: {
@@ -407,23 +424,56 @@ export default function AddDeviceScreen() {
                     onCredentialReceived={onWifiCredentialReceived}
                     onRetryPressed={onWifiScanRetryPressed}
                 />
-            )
-            }
-            (provisionState == provisionStateType.provisioningDevice && (
+            )}
+            {provisioningState == provisionStateType.provisioningDevice && (
                 <Loading 
                     onBackPressed={()=>{}}
                     message="Conectando ..."
                 />
-            ))
-            (provisionState == provisionStateType.provisionWrongPassword && (
-                
-            ))
-            (provisionState == provisionStateType.provisionError && (
-
-            ))
-            (provisionState == provisionStateType.finished && (
-
-            ))
+            )}
+            {provisioningState == provisionStateType.provisionWrongPassword && (
+                <View>
+                    <Loading
+                        onBackPressed={()=>{}}
+                        message="Conectando ..."
+                    />
+                    <ErrorModal
+                        text="Senha incorreta, tente novamente"
+                        onClose={()=>{
+                            dispatch({
+                                type: ProvisionActionType.provisionEvent,
+                                payload: {
+                                    event: userEventType.retryWifiScan
+                                }
+                            })
+                        }}
+                    />
+                </View>
+            )}
+            {provisioningState == provisionStateType.provisionError && (
+                <View>
+                    <Loading
+                        onBackPressed={()=>{}}
+                        message="Conectando ..."
+                    />
+                    <ErrorModal
+                        text="Erro ao se conectar"
+                        onClose={()=>{
+                            dispatch({
+                                type: ProvisionActionType.provisionEvent,
+                                payload: {
+                                    event: userEventType.retryWifiScan
+                                }
+                            })
+                        }}
+                    />
+                </View>
+            )}
+            {provisioningState == provisionStateType.finished && (
+                <View>
+                    
+                </View>
+            )}
         </View>
     )
 };
