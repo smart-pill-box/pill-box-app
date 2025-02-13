@@ -31,14 +31,14 @@ export default function PillList({ pills, onPillReeschadule, onPillDelete, onPil
         haveSomePill = true;
         return (
             <PillComponent
-            key={index}
-            pill={pill}
-            onPillManualConsumed={onPillManualConsumed}
-            onPillDelete={onPillDelete}
-            onPillReeschadule={onPillReeschadule}
+				key={index}
+				pill={pill}
+				onPillManualConsumed={onPillManualConsumed}
+				onPillDelete={onPillDelete}
+				onPillReeschadule={onPillReeschadule}
             />
             )
-        });
+	});
 
         if(!haveSomePill){
             return componentIfEmpty

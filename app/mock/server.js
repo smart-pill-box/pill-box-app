@@ -192,7 +192,7 @@ export function makeServer(){
                 return this.serialize(pill).pill;
             });
 
-            this.passthrough("http://192.168.43.214:8887/**")
+            this.passthrough("http://192.168.15.9:8887/**")
         },
     
         seeds(server) {

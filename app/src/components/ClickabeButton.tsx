@@ -3,16 +3,17 @@ import { TouchableOpacity, Text, View, StyleSheet, StyleProp, ViewStyle, TextSty
 import { globalStyle } from "../style";
 
 interface ClickableButtonProps {
-  width: number;
-  height: number;
+  width: number | string;
+  height: number | string;
   onPress: () => void;
   text: string;
   isEnabled?: boolean;
   buttonStyle?: object;
   textStyle?: any;
+  bttnContainerStyle?: StyleProp<ViewStyle>
 }
 
-export default function ClickableButton({ width, height, onPress, text, isEnabled, buttonStyle, textStyle }: ClickableButtonProps){
+export default function ClickableButton({ width, height, onPress, text, isEnabled, buttonStyle, textStyle, bttnContainerStyle }: ClickableButtonProps){
     if (isEnabled == undefined){
         isEnabled = true
     }
@@ -31,7 +32,7 @@ export default function ClickableButton({ width, height, onPress, text, isEnable
     });
 
   return (
-    <TouchableOpacity onPress={onPress} disabled={!isEnabled}>
+    <TouchableOpacity onPress={onPress} disabled={!isEnabled} style={bttnContainerStyle}>
       <View style={[styles.buttonContainer, { width, height }, buttonStyle]}>
         <Text style={[globalStyle.text, styles.buttonText, textStyle]}> {text} </Text>
       </View>

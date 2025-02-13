@@ -26,7 +26,7 @@
 //          - provisioningFailedFromDevice {"status": 6, "message": failure_reason}
 //          - onProvisioningFailed {"status": 6, "message": exception}
 //
-import { useReducer, useEffect, useState } from 'react';
+import { useReducer, useEffect, useState, useContext } from 'react';
 import {
     PermissionsAndroid,
     SafeAreaView,
@@ -52,7 +52,8 @@ import {
     Wifi,
     ProvisionAction,
     initialStateEvent,
-    deviceProvisionEventType
+    deviceProvisionEventType,
+    getDeviceKeyEventType
 } from "./typeDefs"
 import BleDevicesList from "./components/BleDeviceList"
 import WifisList from './components/WifiList';
@@ -61,11 +62,16 @@ import PendingPermissions from './components/PendingPermissions';
 import PendingBluetoothEnable from './components/PendingBluetoothEnabled';
 import Loading from './components/Loading';
 import ErrorModal from './components/ErrorModal';
+import SetDeviceName from './components/SetDeviceName';
+import axios from 'axios';
+import { MEDICINE_API_HOST } from '../../constants';
+import { ProfileKeyContext } from '../../profile_picker/ProfileKeyContext';
+import { useKeycloak } from '@react-keycloak/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { PillBoxManagerStackList } from '../PillBoxManagerNavigator';
 
 const EspProvisioningModule = NativeModules.EspProvisioningModule;
 const espProvisioningEmitter = new NativeEventEmitter(EspProvisioningModule);
-
-const MulticastModule = NativeModules.MulticastModule;
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -94,14 +100,19 @@ const isBluetoothEnabled = async () => {
     }
 };
 
-export default function AddDeviceScreen() {
+type Props = NativeStackScreenProps<PillBoxManagerStackList, "AddDeviceScreen">;
+
+export default function AddDeviceScreen({ route, navigation }: Props) {
     const [bleDevices, setBleDevices] = useState([]);
     const [selectedBleDevice, setSelectedBleDevice] = useState<BleDevice>({
         serviceUuid: "", deviceName: ""
     });
     const [wifisList, setWifisList] = useState([]);
+	const [deviceKey, setDeviceKey] = useState<string | undefined>(undefined);
     const [selectedWifiCredentials, setSelectedWifiCredentials] = useState<{wifi: Wifi, password: string}>();
     const [provisioningState, dispatch] = useReducer(provisioningStateReducer, provisionStateType.initial);
+    const { profileKey } = useContext(ProfileKeyContext);
+    const {keycloak} = useKeycloak();
 
     function provisioningStateReducer(provisioningState: provisionStateType, action: ProvisionAction){
         if (action.type == ProvisionActionType.initialState){
@@ -120,7 +131,13 @@ export default function AddDeviceScreen() {
                     } 
                 case provisionStateType.scanningPillDevices:
                     if (event == bleScanEventType.BleScanCompleted){
+						let bleDevices: BleDevice[] = action.payload.data;
+						
                         setBleDevices(action.payload.data);
+						if(bleDevices.length == 1){
+							setSelectedBleDevice(bleDevices[0]);
+							return provisionStateType.connectingToPillDevice;
+						}
                         return provisionStateType.selectingPillDevice;
                     }
                 case provisionStateType.selectingPillDevice:
@@ -133,8 +150,14 @@ export default function AddDeviceScreen() {
                     }
                 case provisionStateType.connectingToPillDevice:
                     if (event == deviceConnectionEventType.DeviceConnected){
-                        return provisionStateType.scanningWifis
+                        return provisionStateType.retrievingDeviceKey;
                     } 
+				case provisionStateType.retrievingDeviceKey:
+					if(event == getDeviceKeyEventType.DeviceKeyReceived){
+						setDeviceKey(action.payload.data);
+						console.log("Received device key ", action.payload.data);
+						return provisionStateType.scanningWifis;
+					}
                 case provisionStateType.scanningWifis:
                     if (event == wifiScanEventType.WifiListReceived){
                         setWifisList(action.payload.data);
@@ -154,8 +177,6 @@ export default function AddDeviceScreen() {
                     } else if (event == deviceProvisionEventType.WrongCredentials){
                         return provisionStateType.provisionWrongPassword;
                     } else if (event == deviceProvisionEventType.ProvisionSuccess) {
-                        console.log("Starting multicast receiver");
-                        MulticastModule.startMulticastReceiver();
                         return provisionStateType.finished;
                     }
                 case provisionStateType.provisionError:
@@ -253,6 +274,23 @@ export default function AddDeviceScreen() {
             }
         });
 
+		let espGetDeviceKeyListener = espProvisioningEmitter.addListener(espProvisionEvent.GetDeviceKey, (args) => {
+			switch (args.eventType) {
+				case getDeviceKeyEventType.DeviceKeyReceived:
+					dispatch({
+						type: ProvisionActionType.provisionEvent,
+						payload: {
+							event: getDeviceKeyEventType.DeviceKeyReceived,
+							data: args.data,
+						}
+					});
+					break;
+				case getDeviceKeyEventType.DeviceKeyFailed:
+					console.log("Failed getting device key");
+					break;
+			}
+		});
+
         let espDeviceProvisioningListener = espProvisioningEmitter.addListener(espProvisionEvent.DeviceProvision, (args) => {
             switch(args.eventType) {
                 case deviceProvisionEventType.ProvisionError:
@@ -298,6 +336,8 @@ export default function AddDeviceScreen() {
             espProvisionWifiScanListener.remove();
             espProvisionDeviceConnectionListener.remove();
             espDeviceProvisioningListener.remove();
+			espProvisionDeviceConnectionListener.remove();
+			espGetDeviceKeyListener.remove();
         }
     }, []);
 
@@ -328,8 +368,10 @@ export default function AddDeviceScreen() {
             })
         } else if(provisioningState == provisionStateType.connectingToPillDevice){
             EspProvisioningModule.connectBleDevice(selectedBleDevice.serviceUuid, "pop");
-        } else if(provisioningState == provisionStateType.scanningWifis){
-            EspProvisioningModule.scanNetworks();
+		} else if(provisioningState == provisionStateType.retrievingDeviceKey){
+			EspProvisioningModule.getDeviceKey();
+		} else if(provisioningState == provisionStateType.scanningWifis){
+        	EspProvisioningModule.scanNetworks();
         } else if(provisioningState == provisionStateType.provisioningDevice){
             EspProvisioningModule.sendWifiConfig(selectedWifiCredentials?.wifi.Ssid, selectedWifiCredentials?.password)
         }
@@ -376,6 +418,20 @@ export default function AddDeviceScreen() {
         });
     };
 
+	const onDeviceNameSet = async (name: string) => {
+		try {
+			const accountKey = keycloak?.tokenParsed?.sub;
+			console.log(deviceKey?.length);
+			await axios.post(`${MEDICINE_API_HOST}/account/${accountKey}/profile/${profileKey}/profile_device`, {
+				deviceKey: deviceKey?.substring(0, 36),
+				name: name
+			});
+			navigation.navigate("PillBoxManager");
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
     return (
         <View>
             {provisioningState == provisionStateType.pendingPermissions && (
@@ -411,6 +467,12 @@ export default function AddDeviceScreen() {
                     message={"Conectando ao dispositivo " + selectedBleDevice.deviceName}
                 />
             )}
+			{provisioningState == provisionStateType.retrievingDeviceKey && (
+				<Loading
+					onBackPressed={()=>{}}
+					message="Buscando informações"
+				/>
+			)}
             {provisioningState == provisionStateType.scanningWifis && (
                 <Loading
                     onBackPressed={()=>{}}
@@ -470,9 +532,9 @@ export default function AddDeviceScreen() {
                 </View>
             )}
             {provisioningState == provisionStateType.finished && (
-                <View>
-                    
-                </View>
+				<SetDeviceName
+					onNameSet={ onDeviceNameSet }
+				/>
             )}
         </View>
     )

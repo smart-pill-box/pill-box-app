@@ -12,6 +12,9 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { RootTabParamList } from "../../App";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PillBoxManagerStackList } from "./PillBoxManagerNavigator";
+import { Device } from "../types/device";
+import { ProfileDevice } from "../types/profile_device";
+import DeviceComponent from "./components/DeviceComponent";
 
 type Props = NativeStackScreenProps<PillBoxManagerStackList, "PillBoxManager">;
 
@@ -53,6 +56,8 @@ export default function PillBoxManagerScreen({ route, navigation }: Props){
         name: "",
         avatarNumber: 1
     });
+	const [ profileDevices, setProfileDevices ] = useState<ProfileDevice[]>();
+	const [ finishLoading, setFinishLoading ] = useState(false);
 
     useFocusEffect(
         useCallback(()=>{
@@ -73,13 +78,62 @@ export default function PillBoxManagerScreen({ route, navigation }: Props){
                     console.error(err);
                 }
             }
-            getProfile();
+			const getProfileDevices = async () => {
+				try {
+					const { data } = await axios.get(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/profile_devices`, {
+						headers: {
+							Authorization: keycloak?.token
+						}
+					});
+					
+					setProfileDevices(data.data);
+					setFinishLoading(true);
+				} catch (err) {
+					console.error(err);
+				}
+			}
+
+			const loadAll = async ()=> {
+				await getProfile();
+				await getProfileDevices();
+				setFinishLoading(true);
+			}
+
+			loadAll();
         }, [])
     );
-    return (
-        <View style={{height: "100%"}}>
-            <MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
-            <NoDevicesContainer route={route} navigation={navigation}/>
-        </View>
-    )
+
+	if(!finishLoading || !profileDevices) {
+		return (
+			<View>
+			</View>
+		)
+	}
+
+	if(profileDevices?.length == 0){
+		return (
+			<View style={{height: "100%"}}>
+				<MainHeader profileName={profileData.name} avatarNumber={profileData.avatarNumber}/>
+				<NoDevicesContainer route={route} navigation={navigation}/>
+			</View>
+		)
+	}
+
+	return (
+		<View>
+			<MainHeader
+				profileName={profileData.name}
+				avatarNumber={profileData.avatarNumber}
+			/>
+			<View>
+				<DeviceComponent
+					profileDevice={ profileDevices[0] }
+					onPress={ ()=> { console.log(profileDevices[0].deviceKey); navigation.navigate("DevicePillsScreen", {
+						deviceKey: profileDevices[0].deviceKey
+					}); }}
+				/>
+			</View>
+		</View>
+	)
+
 }

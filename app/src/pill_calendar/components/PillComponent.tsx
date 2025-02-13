@@ -137,6 +137,10 @@ const getPillStatusColor = (pill: Pill)=>{
     if (wasPillForgotten(pill)){
         return "#C80000"
     }
+
+	if(pill.status == "loaded"){
+		return "#007070";
+	}
     
     return "#575757"
 }

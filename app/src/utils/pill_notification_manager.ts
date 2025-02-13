@@ -106,7 +106,7 @@ export default class PillNotificationManager {
         };
 
         await notifee.createTriggerNotification({
-            title: `Chegou a hora de tomar seu remédio!!`,
+            title: `Vó Julia esqueceu de tomar seu remédio a mais de 15 minutos!!`,
             body: `${pillName} - ${getTimeStr(pillDatetime)}`,
             data: {
                 accountKey: accountKey,
@@ -130,20 +130,20 @@ export default class PillNotificationManager {
                 color: "#66E7A9",
                 ongoing: true,
                 smallIcon: "ic_small_icon",
-                actions: [
-                    {
-                        title: '<p style="color: green;"> Já tomei </p>',
-                        pressAction: {
-                            id: "manualyConfirmed"
-                        }
-                    },
-                    {
-                        title: '<p style="color: red;"> Deletar </p>',
-                        pressAction: {
-                            id: "delete"
-                        }
-                    }
-                ]
+                // actions: [
+                //     {
+                //         title: '<p style="color: green;"> Já tomei </p>',
+                //         pressAction: {
+                //             id: "manualyConfirmed"
+                //         }
+                //     },
+                //     {
+                //         title: '<p style="color: red;"> Deletar </p>',
+                //         pressAction: {
+                //             id: "delete"
+                //         }
+                //     }
+                // ]
             }
         }, trigger)
     }

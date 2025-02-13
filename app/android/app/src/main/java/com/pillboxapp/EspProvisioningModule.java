@@ -18,6 +18,7 @@ import com.espressif.provisioning.ESPProvisionManager;
 import com.espressif.provisioning.WiFiAccessPoint;
 import com.espressif.provisioning.DeviceConnectionEvent;
 import com.espressif.provisioning.listeners.BleScanListener;
+import com.espressif.provisioning.listeners.ResponseListener;
 import com.espressif.provisioning.listeners.WiFiScanListener;
 import com.espressif.provisioning.listeners.ProvisionListener;
 import com.facebook.react.bridge.Arguments;
@@ -29,6 +30,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Promise;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -275,5 +277,26 @@ public class EspProvisioningModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void sendWifiConfig(String ssid, String passphrase){
         espDevice.provision(ssid, passphrase, provisionListener);
+    }
+
+    @ReactMethod
+    public void getDeviceKey(){
+        byte[] data = {0b0};
+        espDevice.sendDataToCustomEndPoint("custom-data", data, new ResponseListener() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                WritableMap params = Arguments.createMap();
+                params.putString("eventType", "DeviceKeyReceived");
+                params.putString("data", new String(bytes, StandardCharsets.UTF_8));
+                sendEvent("GetDeviceKey", params);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                WritableMap params = Arguments.createMap();
+                params.putString("eventType", "DeviceKeyFailed");
+                sendEvent("GetDeviceKey", params);
+            }
+        });
     }
 }

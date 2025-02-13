@@ -5,10 +5,14 @@ import PillBoxManagerScreen from "./PillBoxManagerScreen";
 import AddDeviceScreen from "./add_device_screen/AddDeviceScreen";
 import { useLayoutEffect } from "react";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import DevicePillsScreen from "./DevicePillsScreen";
+import DeviceRechargeScreen from "./DeviceRecharge/DeviceRechargeScreen";
 
 export type PillBoxManagerStackList = {
     PillBoxManager: undefined;
     AddDeviceScreen: undefined;
+	DevicePillsScreen: { deviceKey: string };
+	DeviceRechargeScreen: { deviceKey: string };
 }
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillBoxManagerNavigator">
@@ -19,6 +23,8 @@ export default function PillBoxManagerNavigator({ route, navigation }: Props){
     useLayoutEffect(() => {
         const tabHiddenRoutes = [
             "AddDeviceScreen",
+			"DevicePillsScreen",
+			"DeviceRechargeScreen"
         ]
         const routeName = getFocusedRouteNameFromRoute(route);
         if (routeName && tabHiddenRoutes.includes(routeName)){
@@ -37,6 +43,8 @@ export default function PillBoxManagerNavigator({ route, navigation }: Props){
         >
             <Stack.Screen name="PillBoxManager" component={PillBoxManagerScreen}/>
             <Stack.Screen name="AddDeviceScreen" component={AddDeviceScreen}/>
+			<Stack.Screen name="DevicePillsScreen" component={DevicePillsScreen}/>
+			<Stack.Screen name="DeviceRechargeScreen" component={DeviceRechargeScreen}/>
         </Stack.Navigator>
     )
 }

@@ -19,7 +19,7 @@ import { addDays, isAfter, isBefore } from 'date-fns';
 
 type Props = BottomTabScreenProps<RootTabParamList, "PillCalendar">
 
-type PillStatus = "pending" | "manualyConfirmed" | "pillBoxConfirmed" | "canceled" | "reeschaduled"
+type PillStatus = "pending" | "manualyConfirmed" | "pillBoxConfirmed" | "canceled" | "reeschaduled" | "loaded"
 
 type PillsByDate = {
     [key: string]: Pill[] | string;
@@ -33,6 +33,7 @@ export type PillStatusEvent = {
 }
 
 export type Pill = {
+	index?: number;
     name: string;
     pillDatetime: Date;
     pillRoutineKey: string;
@@ -166,6 +167,7 @@ export default function PillCalendarScreen({ route, navigation }: Props){
             (newPillsByDate[localDateString] as Pill[]).push({
                 pillDatetime: pillDatetime,
                 name: pill.name,
+				index: pill.index,
                 pillRoutineKey: pill.pillRoutineKey,
                 status: pill.status,
                 statusEvents: pill.statusEvents
@@ -200,7 +202,8 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     }
 
     const onPillManualyConsumed = async (pill: Pill)=>{
-        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
+		const pillString = `${pill.pillDatetime.toISOString()}`;
+        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pillString}/status`, {
             status: "manualyConfirmed",
         }, {
             headers: {
@@ -215,7 +218,8 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     }
 
     const onPillReeschadule = async (pill: Pill, newDatetime: Date)=>{
-        await axios.post(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/reeschadule`, {
+		const pillString = `${pill.pillDatetime.toISOString()}`;
+        await axios.post(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pillString}/reeschadule`, {
             newPillDatetime: newDatetime.toISOString(),
         }, {
             headers: {
@@ -230,7 +234,8 @@ export default function PillCalendarScreen({ route, navigation }: Props){
     }
 
     const onPillDeleted = async (pill: Pill)=>{
-        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pill.pillDatetime.toISOString()}/status`, {
+		const pillString = `${pill.pillDatetime.toISOString()}`;
+        await axios.put(`${MEDICINE_API_HOST}/account/${keycloak?.tokenParsed?.sub}/profile/${profileKey}/pill_routine/${pill.pillRoutineKey}/pill/${pillString}/status`, {
             status: "canceled",
         }, {
             headers: {

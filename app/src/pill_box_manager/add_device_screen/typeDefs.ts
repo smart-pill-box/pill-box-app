@@ -12,6 +12,7 @@ export enum espProvisionEvent {
     BleScan = "BleScan",
     DeviceConnection = "DeviceConnection",
     DeviceProvision = "DeviceProvision",
+	GetDeviceKey = "GetDeviceKey",
 }
 
 export enum deviceProvisionEventType {
@@ -38,6 +39,11 @@ export enum deviceConnectionEventType {
     DeviceDisconnected = "DeviceDisconnected",
 }
 
+export enum getDeviceKeyEventType {
+	DeviceKeyReceived = "DeviceKeyReceived",
+	DeviceKeyFailed = "DeviceKeyFailed",
+}
+
 export enum bluetoothEventType {
     permissionGranted = "permissionGranted",
     bluetoothEnabled = "bluetoothEnabled",
@@ -62,6 +68,7 @@ export enum provisionStateType {
     scanningPillDevices = "scanningPillDevices",
     selectingPillDevice = "selectingPillDevice", 
     connectingToPillDevice = "connectingToPillDevice",
+	retrievingDeviceKey = "retrievingDeviceKey",
     scanningWifis = "scanningWifis",
     selectingWifi = "selectingWifi",
     provisioningDevice = "provisioningDevice",
@@ -76,7 +83,7 @@ export enum ProvisionActionType {
 }
 
 export type ActionPayload = {
-    event: deviceProvisionEventType | espProvisionEvent | bleScanEventType | wifiScanEventType | deviceConnectionEventType | bluetoothEventType | userEventType | ProvisionActionType | initialStateEvent,
+    event: deviceProvisionEventType | espProvisionEvent | bleScanEventType | wifiScanEventType | deviceConnectionEventType | bluetoothEventType | userEventType | ProvisionActionType | initialStateEvent | getDeviceKeyEventType, 
     data?: any
 }
 
