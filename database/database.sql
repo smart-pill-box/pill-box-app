@@ -87,12 +87,13 @@ CREATE TABLE device (
     id                          SERIAL PRIMARY KEY,
     device_key                  CHAR(36) NOT NULL,
 	device_ip					CHAR(15),
+    last_pooling_datetime       TIMESTAMP NOT NULL,
 	max_positions				INTEGER NOT NULL,
     created_at                  TIMESTAMP NOT NULL DEFAULT(NOW())
 );
 
-INSERT INTO device (device_key, max_positions) VALUES 
-('abcd-efgh-ijklm-nopqrst-uvwxyz123-45', 20);
+INSERT INTO device (device_key, last_pooling_datetime, max_positions) VALUES 
+('abcd-efgh-ijklm-nopqrst-uvwxyz123-45', '1970-01-01 00:00:00', 20);
 
 CREATE TABLE device_pill (
 		id													SERIAL PRIMARY KEY,

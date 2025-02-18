@@ -226,11 +226,13 @@ const weekdayTradutor: {[key: string]: string} = {
     friday: "sex",
     saturday: "sab",
     sunday: "dom",
-}
+};
+
+const weekdaysOrder = Object.keys(weekdayTradutor);
 
 const getFrequencyDetailsText = (pillRoutine: PillRoutine)=>{
     if(pillRoutine.pillRoutineType == "weekdays"){
-        const weekdays = Object.keys(pillRoutine.pillRoutineData);
+        let weekdays = Object.keys(pillRoutine.pillRoutineData);
     
         if (weekdays.length == 7){
             return "Tomar todos os dias"
@@ -241,6 +243,8 @@ const getFrequencyDetailsText = (pillRoutine: PillRoutine)=>{
                 text = "Tomar todo ";
             }
     
+            weekdays = weekdays.sort((a, b) => weekdaysOrder.indexOf(a) - weekdaysOrder.indexOf(b));
+
             weekdays.forEach((weekday: string)=>{
                 text += `${weekdayTradutor[weekday]}, `
             })

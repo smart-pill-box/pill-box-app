@@ -150,7 +150,8 @@ function App(): JSX.Element {
       initOptions={{
         redirectUri: "mymedsafe.pillbox://add_profile",
         token: initTokens?.token,
-        refreshToken: initTokens?.refreshToken, 
+        refreshToken: initTokens?.refreshToken,
+        onLoad: "login-required"
       }}
       onTokens={async (tokens)=>{
         if(!tokens.token || !tokens.refreshToken){

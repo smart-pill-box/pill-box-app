@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native"
 import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack"
 import { PillRoutineStackParamList } from "../PillRoutineManagerNavigator"
 
+
 const weekdayTradutor: {[key: string]: string} = {
     monday: "seg",
     tuesday: "ter",
@@ -17,13 +18,16 @@ const weekdayTradutor: {[key: string]: string} = {
     sunday: "dom",
 }
 
+const weekdaysOrder = Object.keys(weekdayTradutor);
+
 const getDescriptionText = (pillRoutine: PillRoutine)=>{
     if(pillRoutine.pillRoutineType == "weekdays"){
-        const weekdays = Object.keys(pillRoutine.pillRoutineData); 
+        let weekdays = Object.keys(pillRoutine.pillRoutineData); 
         if(weekdays.length == 7){
             return "Todos os dias"
         }
 
+        weekdays = weekdays.sort((a, b) => weekdaysOrder.indexOf(a) - weekdaysOrder.indexOf(b));
         let text = "";
         weekdays.forEach((weekday)=>{
             text += `${weekdayTradutor[weekday]}, `

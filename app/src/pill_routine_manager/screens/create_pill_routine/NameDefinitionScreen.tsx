@@ -18,18 +18,20 @@ export default function NameDefinitionScreen({ route, navigation }: Props){
     const styles = StyleSheet.create({
         container: {
             flexDirection: "column",
-            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 28,
             height: 220,
-            paddingHorizontal: 28
         },
         text: {
             color: "#575757",
             width: "100%",
             fontSize: 24
         },
-        buttonContainer: {
-            alignItems: "flex-end",
-            justifyContent: "flex-end"
+        nextButtonContainer: {
+            position: "absolute",
+            width: "100%",
+            paddingHorizontal: 16,
+            bottom: 16
         }
     })
 
@@ -53,7 +55,7 @@ export default function NameDefinitionScreen({ route, navigation }: Props){
     const [ pillName, setPillName ] = useState<undefined|string>()
 
     return (
-        <View>
+        <View style={{ height: "100%", alignItems: "center", position: "relative" }}>
             <FormsHeader onBackPressed={()=>{navigation.goBack()}}/>
             <View style={styles.container}>
                 <Text style={[globalStyle.text, styles.text]}> Qual o nome do seu medicamento? </Text>
@@ -64,14 +66,15 @@ export default function NameDefinitionScreen({ route, navigation }: Props){
                     onChangeText={setPillName}
                     currentValue={pillName}
                 />
-                <View style={styles.buttonContainer}>
-                    <ClickableButton
-                        width={204}
-                        height={52}
-                        text="Próximo"
-                        onPress={validateAndContinue}
-                    />
-                </View>
+            </View>
+            <View style={styles.nextButtonContainer}>
+                <ClickableButton
+                    width={200}
+                    height={52}
+                    text="Próximo"
+                    onPress={validateAndContinue}
+                    buttonStyle={{ width: "100%" }}
+                />
             </View>
         </View>
     )
